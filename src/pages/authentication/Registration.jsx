@@ -131,26 +131,6 @@ const Registration = () => {
 
       // Step 4: Submit the form data with the image URL
       console.log("Submitting data:", updatedRegisterData);
-      // axiosInstance
-      //   .post("/v1/hotels", updatedRegisterData, {
-      //     headers: {
-      //       token: token, // Set the Authorization header
-      //     },
-      //   })
-      //   .then((response) => {
-      //     console.log("Hotel added successfully:", response.data);
-      //     // dispatch(setRestaurantId(response.data.data));
-      //     // dispatch(setIsRegistered(true));
-      //     // navigate("/success");
-      //     dispatch(setRestaurantId(response.data.data)); // Dispatch Redux actions
-      //     dispatch(setIsRegistered(true));
-      //     dispatch(setIsverified(false))
-      //     navigate("/success");
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error adding the hotel:", error);
-      //   });
-      // Unwrap to handle the promise state (successful or failed)
       const response = await postHotel(updatedRegisterData).unwrap();
       console.log("Hotel added successfully:", response);
       dispatch(setRestaurantId(response.data.data)); // Dispatch Redux actions

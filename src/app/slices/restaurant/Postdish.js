@@ -3,10 +3,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   item_name: "",
   description: "",
-  hotel_id: "hotel_id",
+  hotel_id: "",
   price: "",
   addons: [],
-  photo: "http://ojfw.com/image.png",
+  photo: "",
   is_veg: false,
   is_addon: true,
   is_active: true,
