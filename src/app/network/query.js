@@ -6,6 +6,9 @@ const axiosBaseQuery = ({ baseURL } = {}) => async ({ url, method = 'GET', data,
     console.log("working")
     console.log(token);
     try {
+        if (token === "") {
+            console.log("token is missing in axiosBaseQuery")
+        }
         const result = await axios({
             baseURL,
             url,

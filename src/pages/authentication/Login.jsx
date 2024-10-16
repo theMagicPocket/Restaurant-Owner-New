@@ -16,7 +16,6 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import app from "../../firebase";
-import axiosInstance from "../../axiosInstance";
 import Snackbar from "../../components/Snackbar";
 import { useGetByOwnerQuery } from "../../app/Apis/RegisterApi";
 
@@ -46,43 +45,7 @@ const Login = () => {
       const userEmail = response.user.email;
       const userId = response.user.uid;
       console.log(userId);
-       dispatch(login({ token, userEmail, userId }));
-      // const hotelResponse = await axiosInstance.get("/v1/hotels/", {
-      //   params: {
-      //     owner_id: userId, // Pass userId as owner_id in query parameters
-      //   },
-      //   headers: {
-      //     token: token, // Include the token directly in the headers
-      //   },
-      // });
-      // if (hotelResponse.status === 200) {
-      //   console.log("Data retrieved successfully:", hotelResponse.data.data);
-      //   const hotelData = hotelResponse.data.data;
-
-      //   if (hotelData.length != 0) {
-      //     console.log("cameeee");
-      //     const restaurant_id = hotelData[0].id;
-      //     const is_verified = hotelData[0].is_verified;
-      //     const is_registered = true;
-
-      //     dispatch(login({ token, userEmail, userId, is_verified }));
-      //     dispatch(setIsRegistered(is_registered));
-      //     dispatch(setRestaurantId(restaurant_id));
-      //     navigate("/");
-      //   } else {
-      //     const restaurant_id = "";
-      //     const is_verified = false;
-      //     const is_registered = false;
-      //     dispatch(login({ token, userEmail, userId, is_verified }));
-      //     dispatch(setIsRegistered(is_registered));
-      //     dispatch(setRestaurantId(restaurant_id));
-      //     navigate("/register");
-      //   }
-      // } else {
-      //   console.log("Unexpected response status:", hotelResponse.status);
-      // }
-      // console.log(hotelResponse.data);
-      
+      dispatch(login({ token, userEmail, userId }));
 
       if (hotelData && hotelData.data.length !== 0) {
         const restaurant_id = hotelData.data[0].id;
@@ -92,7 +55,7 @@ const Login = () => {
         // dispatch(login({ token, userEmail, userId, is_verified }));
         dispatch(setIsRegistered(is_registered));
         dispatch(setRestaurantId(restaurant_id));
-        dispatch(setIsverified(is_verified))
+        dispatch(setIsverified(is_verified));
         navigate("/");
       } else if (hotelData && hotelData.length === 0) {
         const restaurant_id = "";
@@ -102,7 +65,7 @@ const Login = () => {
         // dispatch(login({ token, userEmail, userId, is_verified }));
         dispatch(setIsRegistered(is_registered));
         dispatch(setRestaurantId(restaurant_id));
-        dispatch(setIsverified(is_verified))
+        dispatch(setIsverified(is_verified));
         navigate("/register");
       } else if (error) {
         console.log("Failed to fetch hotel data", error);
@@ -135,37 +98,30 @@ const Login = () => {
       console.log("Google user ID:", userId);
 
       // Fetch hotel details for Google sign-in user
-      const hotelResponse = await axiosInstance.get("/v1/hotels/", {
-        params: {
-          owner_id: userId,
-        },
-        headers: {
-          token: token,
-        },
-      });
+      dispatch(login({ token, userEmail, userId }));
 
-      if (hotelResponse.status === 200) {
-        const hotelData = hotelResponse.data.data;
+      if (hotelData && hotelData.data.length !== 0) {
+        const restaurant_id = hotelData.data[0].id;
+        const is_verified = hotelData.data[0].is_verified;
+        const is_registered = true;
 
-        if (hotelData.length !== 0) {
-          const restaurant_id = hotelData[0].id;
-          const is_verified = hotelData[0].is_verified;
-          const is_registered = true;
+        // dispatch(login({ token, userEmail, userId, is_verified }));
+        dispatch(setIsRegistered(is_registered));
+        dispatch(setRestaurantId(restaurant_id));
+        dispatch(setIsverified(is_verified));
+        navigate("/");
+      } else if (hotelData && hotelData.length === 0) {
+        const restaurant_id = "";
+        const is_verified = false;
+        const is_registered = false;
 
-          dispatch(login({ token, userEmail, userId, is_verified }));
-          dispatch(setIsRegistered(is_registered));
-          dispatch(setRestaurantId(restaurant_id));
-          navigate("/");
-        } else {
-          const restaurant_id = "";
-          const is_verified = false;
-          const is_registered = false;
-
-          dispatch(login({ token, userEmail, userId, is_verified }));
-          dispatch(setIsRegistered(is_registered));
-          dispatch(setRestaurantId(restaurant_id));
-          navigate("/register");
-        }
+        // dispatch(login({ token, userEmail, userId, is_verified }));
+        dispatch(setIsRegistered(is_registered));
+        dispatch(setRestaurantId(restaurant_id));
+        dispatch(setIsverified(is_verified));
+        navigate("/register");
+      } else if (error) {
+        console.log("Failed to fetch hotel data", error);
       }
     } catch (error) {
       console.error("Google sign-in failed:", error.message);

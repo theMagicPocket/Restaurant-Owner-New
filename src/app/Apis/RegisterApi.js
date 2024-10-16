@@ -14,16 +14,17 @@ export const RegisterRestaurantApi = createApi({
         method: "POST",
         data,
       }),
-      invalidatesTags: ["Hotel", "GetOwner"],
+      invalidatesTags: ["Hotel"],
     }),
     getByOwner: builder.query({
       query: (owner_id) => ({
         url: "v1/hotels/",
+        method: "GET",
         params: {
           owner_id: owner_id,
         },
       }),
-      providesTags: ["OwnerHotel"],
+      providesTags: ["Hotel"],
     }),
   }),
 });
