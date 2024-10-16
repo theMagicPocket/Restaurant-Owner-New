@@ -1,8 +1,10 @@
-// network/axiosBaseQuery.js
 
 import axios from 'axios';
 
-const axiosBaseQuery = ({ baseURL } = {}) => async ({ url, method = 'GET', data, params }) => {
+const axiosBaseQuery = ({ baseURL } = {}) => async ({ url, method = 'GET', data, params }, { getState }) => {
+    const token = getState()?.auth?.token;
+    console.log("working")
+    console.log(token);
     try {
         const result = await axios({
             baseURL,
@@ -11,7 +13,7 @@ const axiosBaseQuery = ({ baseURL } = {}) => async ({ url, method = 'GET', data,
             data,
             params,
             headers: {
-                token: "dev"
+                token: token
             }
         });
         return { data: result.data };

@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  // useNavigate,
 } from "react-router-dom";
 import Dishes from "./pages/Home/Dishes";
 import Login from "./pages/authentication/Login";
@@ -12,20 +11,19 @@ import Signup from "./pages/authentication/Signup";
 import Orders from "./pages/Home/Orders";
 import Dashboard from "./pages/Home/Dashboard";
 import RegistrationSuccess from "./pages/authentication/RegistrationSuccess";
-// import Settings from "./pages/Home/Settings";
 import { useDispatch, useSelector } from "react-redux";
 import Registration from "./pages/authentication/Registration";
 import AccountSettings from "./pages/Home/AccountSettings";
 import HelpCenter from "./pages/Home/Help";
 import AddDishForm from "./pages/Home/AddDishForm";
 import { useEffect } from "react";
-import axiosInstance from "./axiosInstance";
+// import axiosInstance from "./axiosInstance";
 import { setIsRegistered } from "./app/slices/authentication/authSlice";
 import { setIsverified } from "./app/slices/authentication/authSlice";
 import { setRestaurantId } from "./app/slices/authentication/authSlice";
 import Forgot from "./pages/authentication/Forgot";
-// import { fetchRestaurantData } from "./features/restaurant/registerSlice";
-
+import { useGetByOwnerQuery } from "./app/Apis/RegisterApi";
+// import axiosInstance from "./axiosInstance";
 function App() {
   const token = useSelector((state) => state.auth.token);
   const isRegistered = useSelector((state) => state.auth.is_registered);
@@ -34,55 +32,102 @@ function App() {
   console.log(isRegistered);
   console.log(isVerified);
   const dispatch = useDispatch();
+  const {
+    data: hotelData,
+    error,
+    isLoading,
+    isSuccess,
+  } = useGetByOwnerQuery(userId, {
+    skip: !token || !userId, // Skip fetching if conditions are not met
+  });
+  console.log("outside")
+  console.log(hotelData)
+
+  // useEffect(() => {
+  //   if (token && userId && isVerified == false) {
+  //     const fetchHotelVerificationStatus = async () => {
+  //       try {
+  //         const hotelResponse = await axiosInstance.get("/v1/hotels/", {
+  //           params: {
+  //             owner_id: userId, // Pass userId as owner_id in query parameters
+  //           },
+  //           headers: {
+  //             token: token, // Include the token in headers
+  //           },
+  //         });
+  //         if (hotelResponse.status === 200) {
+  //           console.log(
+  //             "Data retrieved successfully:",
+  //             hotelResponse.data.data
+  //           );
+  //           const hotelData = hotelResponse.data.data;
+
+  //           if (hotelData.length != 0) {
+  //             const restaurant_id = hotelData[0].id;
+  //             const is_verified = hotelData[0].is_verified;
+  //             const is_registered = true;
+
+  //             // dispatch(login({ token, userEmail, userId, is_verified }));
+  //             dispatch(setIsRegistered(is_registered));
+  //             dispatch(setRestaurantId(restaurant_id));
+  //             dispatch(setIsverified(is_verified));
+  //           } else {
+  //             const restaurant_id = "";
+  //             const is_verified = false;
+  //             const is_registered = false;
+  //             // dispatch(login({ token, userEmail, userId, is_verified }));
+  //             dispatch(setIsRegistered(is_registered));
+  //             dispatch(setRestaurantId(restaurant_id));
+  //             dispatch(setIsverified(is_verified));
+  //           }
+  //         } else {
+  //           console.log("Unexpected response status:", hotelResponse.status);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching hotel verification status", error);
+  //       }
+  //     };
+
+  //     fetchHotelVerificationStatus();
+  //   }
+  // }, [token, userId, dispatch]);
+
 
   useEffect(() => {
-    if (token && userId && isVerified == false) {
-      const fetchHotelVerificationStatus = async () => {
-        try {
-          const hotelResponse = await axiosInstance.get("/v1/hotels/", {
-            params: {
-              owner_id: userId, // Pass userId as owner_id in query parameters
-            },
-            headers: {
-              token: token, // Include the token in headers
-            },
-          });
-          if (hotelResponse.status === 200) {
-            console.log(
-              "Data retrieved successfully:",
-              hotelResponse.data.data
-            );
-            const hotelData = hotelResponse.data.data;
+    console.log("Token:", token);
+    console.log("User ID:", userId);
+    console.log("Is Verified:", isVerified);
+    console.log("Skip Query:", !token || !userId || isVerified === true);
 
-            if (hotelData.length != 0) {
-              const restaurant_id = hotelData[0].id;
-              const is_verified = hotelData[0].is_verified;
-              const is_registered = true;
+    if (isSuccess && hotelData && userId ) {
+      // If hotel data is retrieved successfully
+      console.log("useGetByOwnerQuery Api");
+      console.log(hotelData);
+      if (hotelData.data.length !== 0) {
+        const restaurant_id = hotelData.data[0].id;
+        const is_verified = hotelData.data[0].is_verified;
+        const is_registered = true;
 
-              // dispatch(login({ token, userEmail, userId, is_verified }));
-              dispatch(setIsRegistered(is_registered));
-              dispatch(setRestaurantId(restaurant_id));
-              dispatch(setIsverified(is_verified));
-            } else {
-              const restaurant_id = "";
-              const is_verified = false;
-              const is_registered = false;
-              // dispatch(login({ token, userEmail, userId, is_verified }));
-              dispatch(setIsRegistered(is_registered));
-              dispatch(setRestaurantId(restaurant_id));
-              dispatch(setIsverified(is_verified));
-            }
-          } else {
-            console.log("Unexpected response status:", hotelResponse.status);
-          }
-        } catch (error) {
-          console.error("Error fetching hotel verification status", error);
-        }
-      };
+        dispatch(setIsRegistered(is_registered));
+        dispatch(setRestaurantId(restaurant_id));
+        dispatch(setIsverified(is_verified));
+      } else {
+        console.log("cameeeeeeeeeeeeeeee");
+        const restaurant_id = "";
+        const is_verified = false;
+        const is_registered = false;
 
-      fetchHotelVerificationStatus();
+        dispatch(setIsRegistered(is_registered));
+        dispatch(setRestaurantId(restaurant_id));
+        dispatch(setIsverified(is_verified));
+      }
+    } else if (error) {
+      console.error("Error fetching hotel verification status", error);
     }
-  }, [token, userId, dispatch]);
+  }, [isSuccess, hotelData, error, dispatch]);
+
+  if (isLoading) return <p>Loading hotel verification status...</p>;
+  if (error) return <p>Error loading hotel verification status</p>;
 
   // Helper functions to handle navigation conditions
   const redirectToLogin = !token ? <Navigate to="/login" /> : null;

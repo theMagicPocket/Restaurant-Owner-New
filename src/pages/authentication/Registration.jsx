@@ -2,7 +2,7 @@ import { useState } from "react";
 // import { usePostHotelMutation } from "../../app/Apis/RegisterApi";
 import { usePostHotelMutation } from "../../app/Apis/RegisterApi";
 import { useDispatch } from "react-redux";
-import { FaChevronDown } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa"; 
 import app from "../../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getStorage } from "firebase/storage";
@@ -13,8 +13,10 @@ import { setRegisterData } from "../../app/slices/restaurant/registerSlice";
 import {
   setRestaurantId,
   setIsRegistered,
+  setIsverified,
 } from "../../app/slices/authentication/authSlice";
 import { TailSpin } from "react-loader-spinner";
+// import axiosInstance from "../../axiosInstance";
 
 const Registration = () => {
   const dispatch = useDispatch();
@@ -137,8 +139,12 @@ const Registration = () => {
       //   })
       //   .then((response) => {
       //     console.log("Hotel added successfully:", response.data);
-      //     dispatch(setRestaurantId(response.data.data));
+      //     // dispatch(setRestaurantId(response.data.data));
+      //     // dispatch(setIsRegistered(true));
+      //     // navigate("/success");
+      //     dispatch(setRestaurantId(response.data.data)); // Dispatch Redux actions
       //     dispatch(setIsRegistered(true));
+      //     dispatch(setIsverified(false))
       //     navigate("/success");
       //   })
       //   .catch((error) => {
@@ -149,6 +155,7 @@ const Registration = () => {
       console.log("Hotel added successfully:", response);
       dispatch(setRestaurantId(response.data.data)); // Dispatch Redux actions
       dispatch(setIsRegistered(true));
+      dispatch(setIsverified(false)) 
       navigate("/success");
     } catch (error) {
       console.error("Error creating hotel:", error);

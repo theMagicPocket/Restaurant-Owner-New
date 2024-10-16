@@ -8,7 +8,7 @@ const initialState = {
     lat: "jofj",
     long: "weow",
     street: "",
-    door_no: "",
+    door_no: "", 
     pincode: "",
     city: "",
     state: "",
