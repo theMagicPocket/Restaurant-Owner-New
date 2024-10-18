@@ -30,7 +30,7 @@ const AddDishForm = () => {
   const fileInputRef = useRef(null);
 
   const categories = [
-    "Biryani",
+    "Biriyani",
     "Pizza",
     "Burgers",
     "Noodles",
@@ -134,6 +134,7 @@ const AddDishForm = () => {
         hotel_id: restaurant_id,
       };
       console.log(restaurant_id);
+      console.log("dish data");
       console.log(updatedDishData);
       // Uncomment the following to actually post the dish
       const response = await postDish(updatedDishData).unwrap();
@@ -163,6 +164,29 @@ const AddDishForm = () => {
       setSnackbarMessage("Menu item added successfully.");
       setSnackbarType("success");
     } catch (error) {
+      console.log(error)
+      dispatch(
+        setdishData({
+          item_name: "",
+          description: "",
+          hotel_id: "",
+          price: "",
+          addons: [],
+          photo: "",
+          is_veg: false,
+          is_addon: true,
+          is_active: true,
+          category: [],
+        })
+      );
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset the file input
+      }
+      setIsAddonItem(true);
+      setRestaurantImage(null); // Reset the image file
+      setSelectedCategories([]); // Reset selected categories
+      setAddonsEnabled(false); // Reset addon state if needed
+      setSelectedAddons([]); // Reset selected addons
       setSnackbarMessage("Something went wrong. Please try again");
       setSnackbarType("error");
       console.error("Failed to save the dish:", error);

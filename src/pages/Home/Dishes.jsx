@@ -1,3 +1,4 @@
+
 import { FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
 import Sidenavbar from "../../components/Sidenavbar";
@@ -32,7 +33,9 @@ const Dishes = () => {
   ];
 
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const handleCategoryClick = (index) => setSelectedCategory(index);
+  const handleCategoryClick = (index) => {
+    setSelectedCategory(index);
+  };
 
   const sliderSettings = {
     dots: true,
@@ -53,6 +56,11 @@ const Dishes = () => {
       },
     ],
   };
+
+  // Filter food items based on the selected category
+  const filteredFoodItems = data?.data.filter((item) =>
+    item.category.includes(categories[selectedCategory])
+  );
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
@@ -82,7 +90,7 @@ const Dishes = () => {
                   key={index}
                   onClick={() => handleCategoryClick(index)}
                   className={`p-2 px-4 inline-block cursor-pointer bg-gray-50 hover:bg-gray-400 rounded-lg transition-all whitespace-nowrap
-                    ${selectedCategory === index ? "bg-gray-800 font-semibold text-white" : ""}`}
+                    ${selectedCategory === index ? "bg-gray-800 hover:bg-gray-800 font-semibold text-white" : ""}`}
                 >
                   {category}
                 </div>
@@ -91,16 +99,15 @@ const Dishes = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow-2xl rounded-lg p-6">
+        <div className="bg-gray-100 shadow-2xl rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="text-xl font-semibold">
-              Food Items Category Title
+              Food Items in {categories[selectedCategory]}
             </div>
-            
           </div>
 
-          <div className="flex flex-wrap justify-around">
-            {data?.data?.map((item) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredFoodItems?.map((item) => (
               <FoodItemCard key={item.id} item={item} />
             ))}
           </div>
@@ -145,3 +152,4 @@ SamplePrevArrow.propTypes = {
   style: PropTypes.object,
   onClick: PropTypes.func,
 };
+
