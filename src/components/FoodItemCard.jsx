@@ -1,47 +1,11 @@
 
 import { FaTrashAlt, FaToggleOn, FaToggleOff } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import PropTypes from "prop-types";
-import axiosInstance from "../axiosInstance";
-import { useSelector } from "react-redux";
 
 
-const FoodItemCard = ({ item }) => {
+const FoodItemCard = ({ item, addons }) => {
   const [isAvailable, setIsAvailable] = useState(item.is_active);
-  const [addonDetails, setAddonDetails] = useState([]);
-  const token = useSelector((state) => state.auth.token);
-
-  const getbyid = async (id) => {
-    try {
-      const response = await axiosInstance.get(`/v1/fooditems/${id}`, {
-        headers: {
-          token: token
-        }
-      });
-      return response.data; // Assuming the server responds with the food item details in the data field
-    } catch (error) {
-      console.error("Error fetching item by ID:", error);
-      return null; // Handle the error as needed, you can also throw an error if you prefer
-    }
-  };
-
-  const fetchAddonDetails = async (addonIds) => {
-    try {
-      const details = await Promise.all(
-        addonIds.map(async (id) => await getbyid(id))
-      );
-      setAddonDetails(details.filter(Boolean)); // Filter out any null values in case of errors
-    } catch (error) {
-      console.error("Error fetching addon details:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (item.addons.length > 0) {
-      fetchAddonDetails(item.addons);
-    }
-  }, [item.addons]);
-
   const toggleAvailability = async () => {
     const confirmed = window.confirm(
       `Are you sure you want to ${isAvailable ? "turn off" : "turn on"} this item?`
@@ -74,7 +38,8 @@ const FoodItemCard = ({ item }) => {
       {/* Image and Info Section */}
       <div className="flex items-center justify-center mb-4">
         <img
-          src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800"
+          // src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800"
+          src={item.photo}
           alt={item.item_name}
           className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
         />
@@ -102,13 +67,13 @@ const FoodItemCard = ({ item }) => {
       </div>
 
       {/* Add-on Details (Collapsible) */}
-      {addonDetails.length > 0 && (
+      {addons.length > 0 && (
         <details className="mt-3 cursor-pointer">
           <summary className="text-sm font-semibold text-gray-700 mb-1">
-            Add-ons ({addonDetails.length}):
+            Add-ons ({addons.length}):
           </summary>
           <ul className="grid grid-cols-2 gap-2 mt-2">
-            {addonDetails.map((addon, index) => (
+            {addons.map((addon, index) => (
               <li
                 key={index}
                 className="bg-gray-50 p-2 rounded shadow-sm border"
@@ -153,6 +118,14 @@ FoodItemCard.propTypes = {
     is_active: PropTypes.bool.isRequired,
     addons: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
+  addons: PropTypes.arrayOf(
+    // Define the structure for each addon
+    PropTypes.shape({
+      item_name: PropTypes.string.isRequired,
+      price: PropTypes.number.isRequired,
+      is_veg: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
 };
 
 export default FoodItemCard;

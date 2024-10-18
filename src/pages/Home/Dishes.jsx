@@ -13,6 +13,7 @@ const Dishes = () => {
   const { data } = useGetFoodItemsQuery();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
+  // const [addons, setAddons] = useState([]);
 
   const categories = [
     "Biriyani",
@@ -35,6 +36,10 @@ const Dishes = () => {
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const handleCategoryClick = (index) => {
     setSelectedCategory(index);
+  };
+
+  const getAddons = (addonIds) => {
+    return data?.data.filter((item) => addonIds.includes(item.id));
   };
 
   const sliderSettings = {
@@ -61,7 +66,8 @@ const Dishes = () => {
   const filteredFoodItems = data?.data.filter((item) =>
     item.category.includes(categories[selectedCategory])
   );
-
+ 
+  
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <button
@@ -108,7 +114,11 @@ const Dishes = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredFoodItems?.map((item) => (
-              <FoodItemCard key={item.id} item={item} />
+              <FoodItemCard
+                key={item.id}
+                item={item}
+                addons={getAddons(item.addons)}
+              />
             ))}
           </div>
         </div>
