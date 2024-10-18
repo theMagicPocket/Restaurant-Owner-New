@@ -14,12 +14,6 @@ export const FoodApi = createApi({
       }),
       providesTags: ["FoodItem"],
     }),
-    getFoodItemById: builder.query({
-      query: (id) => ({
-        url: `v1/fooditems/${id}`, // Fetch a specific food item by its ID
-      }),
-      providesTags: (result, error, id) => [{ type: "FoodItemById", id }],
-    }),
     postDish: builder.mutation({
       query: (data) => ({
         url: "v1/fooditems/",
@@ -28,8 +22,22 @@ export const FoodApi = createApi({
       }),
       invalidatesTags: ["FoodItem"],
     }),
+    getOrders: builder.query({
+      query: ({ orderStatus }) => {
+        const params = {
+          order_status: orderStatus,
+          hotel_id: "test_hotel_4",
+        };
+
+        return {
+          url: "/v1/orders/",
+          method: "GET",
+          params,
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetFoodItemsQuery, useGetFoodItemByIdQuery, usePostDishMutation } =
+export const { useGetFoodItemsQuery, usePostDishMutation, useGetOrdersQuery } =
   FoodApi;

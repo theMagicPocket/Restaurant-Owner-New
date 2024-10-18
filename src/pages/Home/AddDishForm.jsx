@@ -17,8 +17,8 @@ const AddDishForm = () => {
   const [restaurantImage, setRestaurantImage] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
   const [selectedCategories, setSelectedCategories] = useState([]); // State for categories
-  const [addonsEnabled, setAddonsEnabled] = useState(false); // If the item can have addons
-  const [isAddonItem, setIsAddonItem] = useState(true); // State to check if the item is an addon
+  const [addonsEnabled, setAddonsEnabled] = useState(true); // If the item can have addons
+  const [isAddonItem, setIsAddonItem] = useState(false); // State to check if the item is an addon
   const [selectedAddons, setSelectedAddons] = useState([]); // Selected addons (multiple options)
   const { data: foodItems } = useGetFoodItemsQuery();
   const dishdata = useSelector((RootState) => RootState.PostDishdata);
@@ -45,6 +45,7 @@ const AddDishForm = () => {
     "Curries",
     "Soups",
     "Shakes",
+    "Others",
   ];
 
   const handleCategoryChange = (e) => {
@@ -92,14 +93,32 @@ const AddDishForm = () => {
 
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const handleAddonChange = (e) => {
-    const selectedOptions = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-    setSelectedAddons(selectedOptions);
-    dispatch(setdishData({ ...dishdata, addons: selectedOptions })); // Dispatch the selected addons as an array
+  // const handleAddonChange = (e) => {
+  //   const selectedOptions = Array.from(
+  //     e.target.selectedOptions,
+  //     (option) => option.value
+  //   );
+  //   setSelectedAddons(selectedOptions);
+  //   dispatch(setdishData({ ...dishdata, addons: selectedOptions })); // Dispatch the selected addons as an array
+  // };
+  const handleAddonCheckboxChange = (e, addonId) => {
+    let updatedAddons;
+
+    if (e.target.checked) {
+      // Add the selected addon if it's checked
+      updatedAddons = [...selectedAddons, addonId];
+    } else {
+      // Remove the addon if it's unchecked
+      updatedAddons = selectedAddons.filter((id) => id !== addonId);
+    }
+
+    // Update the selected addons in state
+    setSelectedAddons(updatedAddons);
+
+    // Dispatch the updated addons to the store
+    dispatch(setdishData({ ...dishdata, addons: updatedAddons }));
   };
+
   const validateForm = () => {
     const newErrors = {};
     if (!dishdata.item_name) newErrors.item_name = "Dish Name is required.";
@@ -107,12 +126,10 @@ const AddDishForm = () => {
       newErrors.description = "Description is required.";
     if (!dishdata.price) newErrors.price = "Price is required.";
     if (!restaurantImage) newErrors.photos = "Restaurant Image is required.";
-    if (selectedCategories.length === 0)
+    if (isAddonItem === false && selectedCategories.length === 0)
       newErrors.category = "At least one category must be selected.";
-    // if (isAddonItem && selectedAddons.length === 0)
-    //   newErrors.addons = "At least one addon must be selected.";
-
     setErrors(newErrors);
+    console.log(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -128,10 +145,13 @@ const AddDishForm = () => {
         console.log("Image uploaded:", imageUrl);
       }
 
+      const categoryData = isAddonItem ? ["Others"] : selectedCategories;
+
       const updatedDishData = {
         ...dishdata,
         photo: imageUrl, // Add image URL to register data
         hotel_id: restaurant_id,
+        category: categoryData,
       };
       console.log(restaurant_id);
       console.log("dish data");
@@ -156,7 +176,7 @@ const AddDishForm = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = ""; // Reset the file input
       }
-      setIsAddonItem(true)
+      setIsAddonItem(true);
       setRestaurantImage(null); // Reset the image file
       setSelectedCategories([]); // Reset selected categories
       setAddonsEnabled(false); // Reset addon state if needed
@@ -164,7 +184,7 @@ const AddDishForm = () => {
       setSnackbarMessage("Menu item added successfully.");
       setSnackbarType("success");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       dispatch(
         setdishData({
           item_name: "",
@@ -219,100 +239,6 @@ const AddDishForm = () => {
           <h2 className="text-xl font-semibold mb-4">Add New Dish</h2>
           <form>
             <label className="block mb-4">
-              <span className="text-gray-700">Dish Name</span>
-              <input
-                type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                value={dishdata.item_name}
-                onChange={(e) => onTextchange(e.target.value, "item_name")}
-              />
-              {errors.item_name && (
-                <p className="text-red-600">{errors.item_name}</p>
-              )}
-            </label>
-
-            <label className="block mb-4">
-              <span className="text-gray-700">Description</span>
-              <textarea
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                value={dishdata.description}
-                onChange={(e) => onTextchange(e.target.value, "description")}
-              />
-              {errors.description && (
-                <p className="text-red-600">{errors.description}</p>
-              )}
-            </label>
-
-            <label className="block mb-4">
-              <span className="text-gray-700">Dish Price</span>
-              <input
-                type="number"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                value={dishdata.price}
-                onChange={(e) => onTextchange(Number(e.target.value), "price")}
-              />
-              {errors.price && <p className="text-red-600">{errors.price}</p>}
-            </label>
-
-            <label className="block mb-4">
-              <span className="text-gray-700">Dish Image</span>
-              <input
-                type="file"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                ref={fileInputRef}
-                onChange={handleImageChange}
-              />
-              {errors.photos && <p className="text-red-600">{errors.photos}</p>}
-            </label>
-
-            <label className="block mb-4">
-              <span className="text-gray-700">Veg / Non-Veg</span>
-              <select
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                value={dishdata.is_veg ? "veg" : "nonveg"}
-                onChange={(e) => onvegOptionChange(e.target.value)}
-              >
-                <option value="veg">Veg</option>
-                <option value="nonveg">Non-Veg</option>
-              </select>
-              {errors.is_veg && <p className="text-red-600">{errors.is_veg}</p>}
-            </label>
-
-            <label className="block mb-4">
-              <span className="text-gray-700">
-                Select all Categories which the food item belongs to
-              </span>
-              <input
-                type="text"
-                tabIndex={-1}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 focus:outline-none focus:ring-0"
-                readOnly
-                value={selectedCategories.join(", ")}
-              />
-              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {categories.map((category) => (
-                  <div key={category} className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id={category}
-                      name={category}
-                      value={category}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      checked={selectedCategories.includes(category)}
-                      onChange={handleCategoryChange}
-                    />
-                    <label htmlFor={category} className="ml-2 text-gray-700">
-                      {category}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              {errors.category && (
-                <p className="text-red-600">{errors.category}</p>
-              )}
-            </label>
-
-            <label className="block mb-4">
               <span className="text-gray-700">Is this item an Addon?</span>
               <div className="flex items-center">
                 <label className="mr-4">
@@ -346,62 +272,150 @@ const AddDishForm = () => {
                 </label>
               </div>
             </label>
+            <label className="block mb-4">
+              <span className="text-gray-700">Dish Name</span>
+              <input
+                type="text"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                value={dishdata.item_name}
+                onChange={(e) => onTextchange(e.target.value, "item_name")}
+              />
+              {errors.item_name && (
+                <p className="text-red-600">{errors.item_name}</p>
+              )}
+            </label>
 
-            {/* {addonsEnabled && (
-              <label className="block mb-4">
-                <span className="text-gray-700">Select Addons</span>
-                <select
-                  className="block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  value={selectedAddons}
-                  onChange={handleAddonChange}
-                  multiple // Enable multiple selections
-                >
-                  {addonOptions.map((addon) => (
-                    <option key={addon} value={addon}>
-                      {addon}
-                    </option>
-                  ))}
-                </select>
-                {selectedAddons.length > 0 && (
-                  <div className="mt-2">
-                    <span className="text-gray-700">
-                      Selected Addons: {selectedAddons.join(", ")}
-                    </span>
-                  </div>
-                )}
-              </label>
-            )} */}
+            <label className="block mb-4">
+              <span className="text-gray-700">Description</span>
+              <textarea
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                value={dishdata.description}
+                onChange={(e) => onTextchange(e.target.value, "description")}
+              />
+              {errors.description && (
+                <p className="text-red-600">{errors.description}</p>
+              )}
+            </label>
+
+            <label className="block mb-4">
+              <span className="text-gray-700">Dish Price</span>
+              <input
+                type="text"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                value={dishdata.price}
+                onChange={(e) => onTextchange(Number(e.target.value), "price")}
+              />
+              {errors.price && <p className="text-red-600">{errors.price}</p>}
+            </label>
+
+            <label className="block mb-4">
+              <span className="text-gray-700">Dish Image</span>
+              <input
+                type="file"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+              />
+              {errors.photos && <p className="text-red-600">{errors.photos}</p>}
+            </label>
+
+            <label className="block mb-4">
+              <span className="text-gray-700">Veg / Non-Veg</span>
+              <select
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                value={dishdata.is_veg ? "veg" : "nonveg"}
+                onChange={(e) => onvegOptionChange(e.target.value)}
+              >
+                <option value="veg">Veg</option>
+                <option value="nonveg">Non-Veg</option>
+              </select>
+              {errors.is_veg && <p className="text-red-600">{errors.is_veg}</p>}
+            </label>
 
             {addonsEnabled && (
               <label className="block mb-4">
+                <span className="text-gray-700">
+                  Select all Categories which the food item belongs to
+                </span>
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 focus:outline-none focus:ring-0"
+                  readOnly
+                  value={selectedCategories.join(", ")}
+                />
+                <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {categories.map((category) => (
+                    <div key={category} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={category}
+                        name={category}
+                        value={category}
+                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        checked={selectedCategories.includes(category)}
+                        onChange={handleCategoryChange}
+                      />
+                      <label htmlFor={category} className="ml-2 text-gray-700">
+                        {category}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                {errors.category && (
+                  <p className="text-red-600">{errors.category}</p>
+                )}
+              </label>
+            )}
+
+            {addonsEnabled && (
+              <div className="block mb-4">
                 <span className="text-gray-700">Select Addons</span>
-                <select
-                  className="block w-full border border-gray-300 rounded-md shadow-sm p-2 h-48 overflow-auto" // Increased height for better visibility
-                  value={selectedAddons}
-                  onChange={handleAddonChange}
-                  multiple // Enable multiple selections
-                >
+                <div className="block w-full border border-gray-300 rounded-md shadow-sm p-2 h-48 overflow-auto">
                   {foodItems?.data
                     .filter((item) => item.is_addon) // Filter to get only addons
                     .map((addon) => (
-                      <option key={addon.id} value={addon.id}>
-                        {addon.item_name} - {addon.description} - Rs,
-                        {addon.price}
-                      </option>
+                      <div key={addon.id} className="mb-2">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            value={addon.id}
+                            checked={selectedAddons.includes(addon.id)}
+                            onChange={(e) =>
+                              handleAddonCheckboxChange(e, addon.id)
+                            }
+                            className="form-checkbox h-4 w-4 text-blue-600"
+                          />
+                          <span className="ml-2">
+                            <span className="text-md">
+                              {addon.item_name}
+                            </span>{" "}
+                            {/* Bold and larger text for the item name */}
+                            <span className="text-sm text-gray-500">
+                              - {addon.description}
+                            </span>{" "}
+                            {/* Smaller, gray text for the description */}
+                            <span className="text-base font-semibold text-blue-500">
+                              - Rs {addon.price}
+                            </span>
+                            {/* Green and slightly larger font for the price */}
+                            <span
+                              className={`ml-2 text-xs font-medium ${
+                                addon.is_veg ? "text-green-500" : "text-red-500"
+                              }`}
+                            >
+                              ({addon.is_veg ? "Veg" : "Non-Veg"})
+                            </span>
+                            {/* Green for veg and red for non-veg */}
+                          </span>
+                        </label>
+                      </div>
                     ))}
-                </select>
-                {selectedAddons.length > 0 && (
-                  <div className="mt-2">
-                    <span className="text-gray-700">
-                      Selected Addons: {selectedAddons.join(", ")}
-                    </span>
-                  </div>
-                )}
-
+                </div>
                 {errors.addons && (
                   <p className="text-red-600">{errors.addons}</p>
                 )}
-              </label>
+              </div>
             )}
 
             <button

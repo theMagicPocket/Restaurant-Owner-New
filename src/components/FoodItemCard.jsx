@@ -49,9 +49,10 @@ const FoodItemCard = ({ item, addons }) => {
           {item.item_name}
         </h2>
         <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-        <p className="text-sm text-gray-600 mt-1">
+        
+        {!item.is_addon && (<p className="text-sm text-gray-600 mt-1">
           Category: {item.category.join(", ")}
-        </p>
+        </p>)}
       </div>
 
       {/* Price and Veg/Non-Veg */}
@@ -112,6 +113,7 @@ FoodItemCard.propTypes = {
     price: PropTypes.number.isRequired,
     photo: PropTypes.string.isRequired,
     is_veg: PropTypes.bool.isRequired,
+    is_addon: PropTypes.bool.isRequired,
     category: PropTypes.arrayOf(PropTypes.string).isRequired,
     avg_rating: PropTypes.number,
     no_of_ratings: PropTypes.number,

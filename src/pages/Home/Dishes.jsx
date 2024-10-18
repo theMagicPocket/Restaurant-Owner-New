@@ -16,6 +16,7 @@ const Dishes = () => {
   // const [addons, setAddons] = useState([]);
 
   const categories = [
+    "All",
     "Biriyani",
     "Pizza",
     "Burgers",
@@ -31,6 +32,8 @@ const Dishes = () => {
     "Curries",
     "Soups",
     "Shakes",
+    "AddOns",
+    "Others"
   ];
 
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -63,9 +66,31 @@ const Dishes = () => {
   };
 
   // Filter food items based on the selected category
-  const filteredFoodItems = data?.data.filter((item) =>
-    item.category.includes(categories[selectedCategory])
-  );
+  // const filteredFoodItems = data?.data.filter((item) =>
+  //   item.category.includes(categories[selectedCategory])
+  // );
+
+  const filteredFoodItems = data?.data.filter((item) => {
+    if (selectedCategory === 0) {
+      // For "All" category, return all food items (exclude add-ons by default unless AddOns is selected)
+      return true;
+    } else if (categories[selectedCategory] === "AddOns") {
+      // For "AddOns" category, return only items that are add-ons
+      return item.is_addon === true;
+    }
+    // else if (categories[selectedCategory] === "thers") {
+    //   console.log(categories[selectedCategory]);
+    //   // For "Others" category, return items with category "Others" and not add-ons
+    //   return item.category === "Others" && item.is_addon === false;
+    // }
+    else {
+      // For all other categories, return items in the selected category and exclude add-ons
+      return (
+        item.category.includes(categories[selectedCategory]) &&
+        item.is_addon === false
+      );
+    }
+  });
  
   
   return (

@@ -1,17 +1,21 @@
-// pages/Orders.js
-import  { useState } from "react";
+import { useState } from "react";
 import Sidenavbar from "../../components/Sidenavbar";
 import { FaTimes, FaBars } from "react-icons/fa";
 import OrderCard from "../../components/OrderCard";
+// import { useGetOrdersQuery } from "../../app/Apis/FoodApi";
 
 const Orders = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const [status, setStatus] = useState("PLACED"); // Default status
+  // const { data: ordersData, isLoading, error } = useGetOrdersQuery(status);
   const handleToggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   // Sample order data
+  const handleStatusChange = (newStatus) => {
+    setStatus(newStatus);
+  };
 
   const orderData = {
     restaurantName: "Kebab & Curry",
@@ -57,17 +61,25 @@ const Orders = () => {
           isSidebarOpen ? "ml-64" : ""
         } md:ml-0 p-4`}
       >
-        {/* Order Status Summary */}
-        <div className="flex flex-wrap gap-4 mb-6 mt-4">
-          <span className="bg-white shadow-md p-2 px-4 rounded text-red-600">
-            Preparing: {2}
-          </span>
-          <span className="bg-white shadow-md p-2 px-4 rounded text-green-600">
-            Ready: {1}
-          </span>
-          <span className="bg-white shadow-md p-2 px-4 rounded text-gray-600">
-            Picked Up: {0}
-          </span>
+        <div className="flex gap-2 mb-4">
+          {[
+            "PLACED",
+            "ACCEPTED",
+            "READY",
+            "PICKED_UP",
+            "DELIVERED",
+            "CANCELLED_BY_HOTEL",
+          ].map((statusType) => (
+            <button
+              key={statusType}
+              onClick={() => handleStatusChange(statusType)}
+              className={`${
+                status === statusType ? "bg-blue-600 text-white" : "bg-white"
+              } px-4 py-2 rounded shadow-md`}
+            >
+              {statusType.replace("_", " ")}
+            </button>
+          ))}
         </div>
 
         {/* Order Card */}
@@ -81,3 +93,20 @@ const Orders = () => {
 };
 
 export default Orders;
+
+{
+  /* Order Status Summary */
+}
+{
+  /* <div className="flex flex-wrap gap-4 mb-6 mt-4">
+          <span className="bg-white shadow-md p-2 px-4 rounded text-red-600">
+            Preparing: {2}
+          </span>
+          <span className="bg-white shadow-md p-2 px-4 rounded text-green-600">
+            Ready: {1}
+          </span>
+          <span className="bg-white shadow-md p-2 px-4 rounded text-gray-600">
+            Picked Up: {0}
+          </span>
+        </div> */
+}

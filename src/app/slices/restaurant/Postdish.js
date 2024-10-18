@@ -8,7 +8,7 @@ const initialState = {
   addons: [],
   photo: "",
   is_veg: false,
-  is_addon: true,
+  is_addon: false,
   is_active: true,
   category: [],
 };
