@@ -1,60 +1,91 @@
-// components/OrderCard.js
-
+import { FiPrinter } from "react-icons/fi";
 
 const OrderCard = ({ order }) => {
-    
+  if (!order) {
+    return <p className="text-gray-600">Select an order to see details</p>;
+  }
+
   return (
-    <div className="shadow-lg bg-white rounded-md p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 m-2">
-      {/* Restaurant and Order Details */}
-      <div className="flex-1 flex flex-col justify-between text-gray-700">
-        <div className="font-semibold text-lg mb-1">{order.restaurantName}</div>
-        <div className="text-sm text-gray-500 mb-2">{order.location}</div>
-        <div className="border-t border-gray-200 my-2"></div>
-
-        <div className="text-sm mb-1">Order ID: {order.id}</div>
-        <div className="text-sm mb-1">
-          Customer: {order.customerName} ({order.orderCount} order)
-        </div>
-        <div className="text-sm">Contact: {order.customerContact}</div>
-      </div>
-
-      <div className="h-auto w-px bg-gray-200 mx-4 hidden md:block"></div>
-
-      {/* Order Items and Total */}
-      <div className="flex-1 text-gray-700">
-        {order.items.map((item, index) => (
-          <div key={index} className="mb-3 flex justify-between items-center">
-            <span>
-              {item.quantity} x {item.name}
-            </span>
-            <span>Rs {item.price}</span>
-          </div>
-        ))}
-        <div className="border-t border-gray-200 my-2"></div>
-        <div className="font-semibold mt-2 flex justify-between items-center">
-          <span>Total Bill:</span>
-          <span>Rs {order.totalBill}</span>
-        </div>
-        <button className="h-10 w-full bg-blue-600 text-center m-3 mx-0 rounded text-white flex items-center justify-center">
-          Order Ready
+    <div className="flex flex-col h-full p-4 border rounded-lg bg-white mb-4">
+      <div className="flex justify-between items-center bg-gray-100 h-16 p-2">
+        <h2 className="text-blue-800 text-lg font-bold">#{order.id}</h2>
+        <p className="text-xs text-gray-500">{order.receivedTime}</p>
+        <button className="text-gray-500 text-sm flex items-center">
+          <FiPrinter className="mr-1" /> Print
         </button>
       </div>
 
-      <div className="h-auto w-px bg-gray-200 mx-4 hidden md:block"></div>
-
-      {/* Delivery Partner Details */}
-      <div className="flex-1 text-gray-700">
-        <div className="font-semibold text-lg mb-1">Delivery Partner</div>
-        <div className="text-sm mb-2">{order.deliveryPartnerStatus}</div>
-        <div className="flex gap-4 mt-2">
-          <span className="text-blue-500 cursor-pointer hover:underline">
-            Track
-          </span>
-          <span className="text-blue-500 cursor-pointer hover:underline">
-            Call
-          </span>
+      {/* Order items */}
+      <div className="flex-grow overflow-y-auto max-h-72 mt-2">
+        <div className="mt-2">
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
+          <div className="flex justify-between items-center border-b py-2">
+            <p className="text-gray-700">{order.restaurant}</p>
+            <p className="text-gray-700">₹{order.totalPrice}</p>
+          </div>
         </div>
-        <div className="mt-3 text-sm">Arriving in {order.arrivalTime}</div>
+      </div>
+
+      {/* Order info */}
+      <div className="flex flex-col justify-between mt-2 border-t pt-2 flex-grow">
+        <div className="mb-auto"></div>
+
+        {/* Fixed action buttons */}
+        <div className="sticky bottom-0 py-4">
+          <div className="flex justify-between items-center bg-gray-100 p-2 mb-2">
+            <div>
+              <p className="text-gray-500 text-sm">Pick-up Time</p>
+              <p className="text-gray-700">{order.pickupTime}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Delivery Executive</p>
+              <p className="text-gray-700">ASSIGNING...</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Grand Total</p>
+              <p className="text-gray-700">₹{order.totalPrice}</p>
+            </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <button className="bg-red-800 text-white py-2 px-6 rounded-lg">
+              Reject Order
+            </button>
+            <button className="bg-blue-900 text-white py-2 px-6 rounded-lg">
+              Accept Order
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
