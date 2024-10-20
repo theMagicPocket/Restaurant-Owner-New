@@ -2,13 +2,17 @@ import { FiPrinter } from "react-icons/fi";
 import { useUpdateOrderMutation } from "../app/Apis/FoodApi";
 import { useGetOrdersQuery } from "../app/Apis/FoodApi";
 import { useSelector } from "react-redux";
+import PropTypes from "prop-types"; 
+import Snackbar from "./Snackbar";
+import { useState } from "react";
 
-const OrderCard = ({ order, getFoodItemDetails, getAddonDetails }) => {
+const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders, setSelectedOrder }) => {
+  const hotelId = useSelector((state) => state.auth.restaurant_id);
   const [updateOrder] = useUpdateOrderMutation();
-  
-
   const { refetch: refetchOrders } = useGetOrdersQuery();
-   const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("success"); 
+   
   if (!order) {
     return <p className="text-gray-600">Select an order to see details</p>;
   }
@@ -40,22 +44,43 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails }) => {
   };
   const buttonText = getButtonText(order.order_status);
 
-   const handleStatusUpdate = async () => {
-     const nextStatus = getNextStatus(order.order_status);
-     if (nextStatus) {
-       try {
-         await updateOrder({ orderId: order.order_id, orderStatus: nextStatus });
-         //  refetchOrders({ order_status: nextStatus, hotelId: hotelId });
-        refetchOrders({ orderStatus: nextStatus, hotelId }); 
+  const handleStatusUpdate = async () => {
+    const nextStatus = getNextStatus(order.order_status);
+    if (nextStatus) {
+      try {
+        await updateOrder({ orderId: order.order_id, orderStatus: nextStatus });
+        refetchOrders({ orderStatus: nextStatus, hotelId: hotelId });
 
-       } catch (error) {
-         console.error("Failed to update order status", error);
-       }
-     }
-   };
+        // Find the index of the current order in the filteredOrders array
+        const currentOrderIndex = filteredOrders.findIndex(
+          (o) => o.order_id === order.order_id
+        );
+
+        // Select the next order if available
+        const nextOrder =
+          filteredOrders[currentOrderIndex + 1] || null; // Move to the next order, or loop back to the first one if it's the last order
+        setSelectedOrder(nextOrder);
+         setSnackbarMessage(
+           "Order updated successfully"
+         );
+         setSnackbarType("success");
+
+      } catch (error) {
+        setSnackbarMessage("Something Went Wrong, Please try again.");
+        setSnackbarType("error");
+        console.error("Failed to update order status", error);
+      }
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-full p-4 border rounded-lg bg-white mb-4">
+      <Snackbar
+        message={snackbarMessage}
+        type={snackbarType}
+        onClose={() => setSnackbarMessage("")} // Clear message on close
+      />
       <div className="flex justify-between items-center bg-gray-100 h-16 p-2">
         <h2 className="text-blue-800 text-lg font-bold">
           #{order.order_id.slice(-4)}
@@ -92,13 +117,13 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails }) => {
                   <div className="mt-1">
                     <p className="text-gray-500 text-sm">Add-ons:</p>
                     {addons.map((addon) => (
-                      <p
+                      <div
                         key={addon.id}
                         className="flex justify-between text-gray-700"
                       >
                         <p> + {addon.item_name} </p>
                         <p>(₹{addon.price})</p>
-                      </p>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -136,18 +161,67 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails }) => {
               Accept Order
             </button> */}
             {buttonText && (
-                <button
-                  className="bg-blue-900 text-white py-2 px-6 rounded-lg"
-                  onClick={handleStatusUpdate}
-                >
-                  {buttonText}
-                </button>
+              <button
+                className="bg-blue-900 text-white py-2 px-6 rounded-lg"
+                onClick={handleStatusUpdate}
+              >
+                {buttonText}
+              </button>
             )}
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+
+OrderCard.propTypes = {
+  order: PropTypes.shape({
+    order_id: PropTypes.string.isRequired,
+    order_status: PropTypes.string.isRequired,
+    created_at: PropTypes.string.isRequired,
+    order_total_price: PropTypes.number.isRequired,
+    order_items: PropTypes.arrayOf(
+      PropTypes.shape({
+        fooditem_id: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number.isRequired,
+        addons: PropTypes.arrayOf(
+          PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            item_name: PropTypes.string.isRequired,
+            price: PropTypes.number.isRequired,
+          })
+        ).isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+  getFoodItemDetails: PropTypes.func.isRequired,
+  getAddonDetails: PropTypes.func.isRequired,
+  filteredOrders: PropTypes.arrayOf(
+    PropTypes.shape({
+      order_id: PropTypes.string.isRequired,
+      order_status: PropTypes.string.isRequired,
+      created_at: PropTypes.string.isRequired,
+      order_total_price: PropTypes.number.isRequired,
+      order_items: PropTypes.arrayOf(
+        PropTypes.shape({
+          fooditem_id: PropTypes.string.isRequired,
+          quantity: PropTypes.number.isRequired,
+          price: PropTypes.number.isRequired,
+          addons: PropTypes.arrayOf(
+            PropTypes.shape({
+              id: PropTypes.string.isRequired,
+              item_name: PropTypes.string.isRequired,
+              price: PropTypes.number.isRequired,
+            })
+          ).isRequired,
+        })
+      ).isRequired,
+    })
+  ).isRequired,
+  setSelectedOrder: PropTypes.func.isRequired,
 };
 
 export default OrderCard;

@@ -36,6 +36,10 @@ export const FoodApi = createApi({
         };
       },
       providesTags: ["Order"],
+      keepUnusedDataFor: 0,
+      refetchOnFocus: true, // Refetch on window focus
+      refetchOnReconnect: true,
+      refetchOnMountOrArgChange: true,
     }),
     updateOrder: builder.mutation({
       query: ({ orderId, orderStatus }) => ({

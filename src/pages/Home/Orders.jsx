@@ -6,11 +6,11 @@ import OrderCard from "../../components/OrderCard";
 import { useGetOrdersQuery } from "../../app/Apis/FoodApi";
 import { useSelector } from "react-redux";
 import { useGetFoodItemsQuery } from "../../app/Apis/FoodApi";
+import { useEffect } from "react";
 
 const Orders = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("PLACED");
-  const [selectedOrder, setSelectedOrder] = useState(null); // For showing selected order details
   const [isMobilePopupOpen, setIsMobilePopupOpen] = useState(false); // For mobile popup
   const hotelId = useSelector((state) => state.auth.restaurant_id);
   const {
@@ -21,8 +21,17 @@ const Orders = () => {
     orderStatus: selectedStatus,
     hotelId: hotelId, // Replace with dynamic hotel ID as needed
   });
+  const filteredOrders = ordersData?.data;
   const { data: foodItemsData, isLoading: isFoodItemsLoading } =
     useGetFoodItemsQuery();
+   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // useEffect to set the initial selected order
+  useEffect(() => {
+    if (filteredOrders && filteredOrders.length > 0) {
+      setSelectedOrder(filteredOrders[0]); // Set the first order as selected
+    }
+  }, [filteredOrders]); 
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -68,7 +77,7 @@ const Orders = () => {
   if (isOrdersLoading || isFoodItemsLoading) return <p>Loading orders...</p>;
   if (error) return <p>Failed to load orders</p>;
 
-  const filteredOrders = ordersData?.data;
+  
   console.log(ordersData);
 
   return (
@@ -113,9 +122,18 @@ const Orders = () => {
           />
           <div className="space-y-4">
             {filteredOrders.map((order) => (
+              // <div
+              //   key={order.id}
+              //   className="p-4 border rounded-lg bg-white shadow-sm cursor-pointer"
+              //   onClick={() => handleOrderClick(order)}
+              // >
               <div
                 key={order.id}
-                className="p-4 border rounded-lg bg-white shadow-sm cursor-pointer"
+                className={`p-4 border rounded-lg bg-white shadow-sm cursor-pointer ${
+                  selectedOrder?.order_id === order.order_id
+                    ? "bg-gray-300"
+                    : ""
+                }`} // Apply background color if the order is selected
                 onClick={() => handleOrderClick(order)}
               >
                 <p className="text-blue-600 font-bold">{order.order_id}</p>
@@ -154,11 +172,17 @@ const Orders = () => {
             ))}
           </div>
           <div className="flex-grow h-full flex flex-col">
-            <OrderCard
-              order={selectedOrder}
-              getFoodItemDetails={getFoodItemDetails}
-              getAddonDetails={getAddonDetails}
-            />
+            {selectedOrder ? (
+              <OrderCard
+                order={selectedOrder}
+                getFoodItemDetails={getFoodItemDetails}
+                getAddonDetails={getAddonDetails}
+                filteredOrders={filteredOrders}
+                setSelectedOrder={setSelectedOrder}
+              />
+            ) : (
+              <p className="text-gray-600">No orders to display</p>
+            )}
           </div>
         </div>
 
@@ -172,11 +196,17 @@ const Orders = () => {
               >
                 <FaTimes size={20} />
               </button>
-              <OrderCard
-                order={selectedOrder}
-                getFoodItemDetails={getFoodItemDetails}
-                getAddonDetails={getAddonDetails}
-              />{" "}
+              {selectedOrder ? (
+                <OrderCard
+                  order={selectedOrder}
+                  getFoodItemDetails={getFoodItemDetails}
+                  getAddonDetails={getAddonDetails}
+                  filteredOrders={filteredOrders}
+                  setSelectedOrder={setSelectedOrder}
+                />
+              ) : (
+                <p className="text-gray-600">No orders to display</p>
+              )}
               {/* Reusing the component */}
             </div>
           </div>

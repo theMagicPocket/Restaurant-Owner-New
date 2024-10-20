@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-const Snackbar = ({ message, type, duration = 4000, onClose }) => {
+const Snackbar = ({ message, type, duration = 10000, onClose }) => {
   const [visible, setVisible] = useState(!!message);
 
   useEffect(() => {
