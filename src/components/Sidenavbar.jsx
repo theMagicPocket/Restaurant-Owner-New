@@ -78,6 +78,13 @@ const Sidenavbar = ({ onClose }) => {
           activeItem={activeItem}
           onItemClicked={handleItemClick}
         />
+        <SidebarItem
+          icon={<FaUtensils />}
+          label="Manage Vouchers"
+          path="/vouchers"
+          activeItem={activeItem}
+          onItemClicked={handleItemClick}
+        />
       </div>
       <div>
         <SidebarItem

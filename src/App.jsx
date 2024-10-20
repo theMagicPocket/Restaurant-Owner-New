@@ -23,6 +23,7 @@ import { setIsverified } from "./app/slices/authentication/authSlice";
 import { setRestaurantId } from "./app/slices/authentication/authSlice";
 import Forgot from "./pages/authentication/Forgot";
 import { useGetByOwnerQuery } from "./app/Apis/RegisterApi";
+import Vouchers from "./pages/Home/Vouchers";
 // import axiosInstance from "./axiosInstance";
 function App() {
   const token = useSelector((state) => state.auth.token);
@@ -183,6 +184,7 @@ function App() {
             element={handlePrivateRoute(AccountSettings)}
           />
           <Route path="/help" element={handlePrivateRoute(HelpCenter)} />
+          <Route path="/vouchers" element={handlePrivateRoute(Vouchers)} />
         </Routes>
       </Router>
     </div>
