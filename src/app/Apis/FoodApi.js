@@ -23,10 +23,10 @@ export const FoodApi = createApi({
       invalidatesTags: ["FoodItem"],
     }),
     getOrders: builder.query({
-      query: ({ orderStatus }) => {
+      query: ({ orderStatus, hotelId }) => {
         const params = {
           order_status: orderStatus,
-          hotel_id: "test_hotel_4",
+          hotel_id: hotelId
         };
 
         return {

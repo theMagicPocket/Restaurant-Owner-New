@@ -1,13 +1,28 @@
-import { useState } from "react";
+
+import { useState, useMemo } from "react";
 import Sidenavbar from "../../components/Sidenavbar";
 import { FaTimes, FaBars } from "react-icons/fa";
 import OrderCard from "../../components/OrderCard";
+import { useGetOrdersQuery } from "../../app/Apis/FoodApi";
+import { useSelector } from "react-redux";
+import { useGetFoodItemsQuery } from "../../app/Apis/FoodApi";
 
 const Orders = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState("NEW");
+  const [selectedStatus, setSelectedStatus] = useState("PLACED");
   const [selectedOrder, setSelectedOrder] = useState(null); // For showing selected order details
   const [isMobilePopupOpen, setIsMobilePopupOpen] = useState(false); // For mobile popup
+  const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const {
+    data: ordersData,
+    isLoading: isOrdersLoading,
+    error,
+  } = useGetOrdersQuery({
+    orderStatus: selectedStatus,
+    hotelId: hotelId, // Replace with dynamic hotel ID as needed
+  });
+  const { data: foodItemsData, isLoading: isFoodItemsLoading } =
+    useGetFoodItemsQuery();
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -29,84 +44,32 @@ const Orders = () => {
     setIsMobilePopupOpen(false);
   };
 
-  const orders = [
-    {
-      id: 5167,
-      items: 2,
-      totalPrice: 187.2,
-      receivedTime: "6 minutes ago",
-      status: "NEW",
-      pickupTime: "10 MINS",
-      restaurant: "Hi-Tech Bawarchi",
-    },
-    {
-      id: 5168,
-      items: 2,
-      totalPrice: 36,
-      receivedTime: "10 minutes ago",
-      status: "PREPARING",
-      pickupTime: "15 MINS",
-      restaurant: "Golconda Chefs",
-    },
-    {
-      id: 5169,
-      items: 3,
-      totalPrice: 200,
-      receivedTime: "15 minutes ago",
-      status: "NEW",
-      pickupTime: "20 MINS",
-      restaurant: "Paradise Biryani",
-    },
-    {
-      id: 5170,
-      items: 4,
-      totalPrice: 250,
-      receivedTime: "20 minutes ago",
-      status: "PREPARING",
-      pickupTime: "25 MINS",
-      restaurant: "Kritunga Restaurant",
-    },
-    {
-      id: 5171,
-      items: 1,
-      totalPrice: 50,
-      receivedTime: "25 minutes ago",
-      status: "READY",
-      pickupTime: "5 MINS",
-      restaurant: "Alpha Hotel",
-    },
-    {
-      id: 5172,
-      items: 2,
-      totalPrice: 100,
-      receivedTime: "30 minutes ago",
-      status: "PAST ORDERS",
-      pickupTime: "N/A",
-      restaurant: "Bawarchi Express",
-    },
-    {
-      id: 5173,
-      items: 5,
-      totalPrice: 400,
-      receivedTime: "35 minutes ago",
-      status: "PAST ORDERS",
-      pickupTime: "N/A",
-      restaurant: "Mehfil Restaurant",
-    },
-    {
-      id: 5174,
-      items: 3,
-      totalPrice: 300,
-      receivedTime: "40 minutes ago",
-      status: "NEW",
-      pickupTime: "30 MINS",
-      restaurant: "Ulava Charu",
-    },
-  ];
+  // Move the useMemo hook before any returns
+  const foodItemsMap = useMemo(() => {
+    if (!foodItemsData) return {};
 
-  const filteredOrders = orders.filter(
-    (order) => order.status === selectedStatus
-  );
+    return foodItemsData.data.reduce((acc, foodItem) => {
+      acc[foodItem.id] = foodItem; // Create a map with food item ID as the key
+      return acc;
+    }, {});
+  }, [foodItemsData]);
+
+  // Helper function to get food item details by ID
+  const getFoodItemDetails = (fooditem_id) => {
+    return foodItemsMap[fooditem_id] || {};
+  };
+
+  // Helper function to get add-on details by ID
+  const getAddonDetails = (addonIds) => {
+    return addonIds.map((addonId) => foodItemsMap[addonId] || {});
+  };
+
+  // Loading and error states
+  if (isOrdersLoading || isFoodItemsLoading) return <p>Loading orders...</p>;
+  if (error) return <p>Failed to load orders</p>;
+
+  const filteredOrders = ordersData?.data;
+  console.log(ordersData);
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 relative">
@@ -129,7 +92,7 @@ const Orders = () => {
         {/* Left side: Orders list */}
         <div className="w-full md:w-5/12 py-4 px-2 bg-gray-100 flex-grow overflow-y-auto">
           <div className="flex flex-row items-center mb-4 md:hidden">
-            {["NEW", "PREPARING", "READY", "PAST ORDERS"].map((status) => (
+            {["PLACED", "PREPARING", "READY", "PAST ORDERS"].map((status) => (
               <button
                 key={status}
                 onClick={() => filterOrders(status)}
@@ -155,13 +118,17 @@ const Orders = () => {
                 className="p-4 border rounded-lg bg-white shadow-sm cursor-pointer"
                 onClick={() => handleOrderClick(order)}
               >
-                <p className="text-blue-600 font-bold">{order.id}</p>
+                <p className="text-blue-600 font-bold">{order.order_id}</p>
                 <p className="text-sm text-gray-500">
-                  {order.items} Item for ₹{order.totalPrice}
+                  {order.items} Item for ₹{order.order_total_price}
                 </p>
-                <p className="text-xs text-gray-400">{order.receivedTime}</p>
+                <p className="text-xs text-gray-400">
+                  {new Date(order.created_at).toLocaleString()}
+                </p>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">{order.status}</span>
+                  <span className="text-sm text-gray-400">
+                    {order.order_status}
+                  </span>
                   <div className="ml-2 w-4 h-4 rounded-full border border-gray-300"></div>
                 </div>
               </div>
@@ -172,7 +139,7 @@ const Orders = () => {
         {/* Right side: Order details */}
         <div className="hidden md:block w-full md:w-2/3 py-4 bg-gray-100 h-screen flex flex-col">
           <div className="hidden md:flex flex-row mb-2">
-            {["NEW", "PREPARING", "READY", "PAST ORDERS"].map((status) => (
+            {["PLACED", "PREPARING", "READY", "PAST ORDERS"].map((status) => (
               <button
                 key={status}
                 onClick={() => filterOrders(status)}
@@ -186,22 +153,31 @@ const Orders = () => {
               </button>
             ))}
           </div>
-          <div className="flex-grow">
-            <OrderCard order={selectedOrder} />
+          <div className="flex-grow h-full flex flex-col">
+            <OrderCard
+              order={selectedOrder}
+              getFoodItemDetails={getFoodItemDetails}
+              getAddonDetails={getAddonDetails}
+            />
           </div>
         </div>
 
         {/* Mobile popup for order details */}
         {isMobilePopupOpen && (
           <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg p-4 w-full max-w-lg relative mx-2 my-7">
+            <div className="bg-white rounded-lg p-4 w-full max-w-lg relative mx-2 my-2">
               <button
                 className="absolute top-2 right-2 text-gray-500"
                 onClick={closeMobilePopup}
               >
                 <FaTimes size={20} />
               </button>
-              <OrderCard order={selectedOrder} /> {/* Reusing the component */}
+              <OrderCard
+                order={selectedOrder}
+                getFoodItemDetails={getFoodItemDetails}
+                getAddonDetails={getAddonDetails}
+              />{" "}
+              {/* Reusing the component */}
             </div>
           </div>
         )}
@@ -211,4 +187,5 @@ const Orders = () => {
 };
 
 export default Orders;
+
 
