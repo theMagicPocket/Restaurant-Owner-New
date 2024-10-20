@@ -5,7 +5,7 @@ const BASE_URL = "http://13.235.77.237:4000/";
 
 export const FoodApi = createApi({
   reducerPath: "FoodApi",
-  tagTypes: ["FoodItem", "FoodItemById"],
+  tagTypes: ["FoodItem", "FoodItemById", "Order"],
   baseQuery: axiosBaseQuery({ baseURL: BASE_URL }),
   endpoints: (builder) => ({
     getFoodItems: builder.query({
@@ -26,7 +26,7 @@ export const FoodApi = createApi({
       query: ({ orderStatus, hotelId }) => {
         const params = {
           order_status: orderStatus,
-          hotel_id: hotelId
+          hotel_id: hotelId,
         };
 
         return {
@@ -35,9 +35,22 @@ export const FoodApi = createApi({
           params,
         };
       },
+      providesTags: ["Order"],
+    }),
+    updateOrder: builder.mutation({
+      query: ({ orderId, orderStatus }) => ({
+        url: `/v1/orders/${orderId}`,
+        method: "PATCH", // or PATCH based on the API requirement
+        data: { order_status: orderStatus },
+      }),
+      invalidatesTags: ["Order"], // This ensures the orders list is updated
     }),
   }),
 });
 
-export const { useGetFoodItemsQuery, usePostDishMutation, useGetOrdersQuery } =
-  FoodApi;
+export const {
+  useGetFoodItemsQuery,
+  usePostDishMutation,
+  useGetOrdersQuery,
+  useUpdateOrderMutation,
+} = FoodApi;

@@ -92,7 +92,7 @@ const Orders = () => {
         {/* Left side: Orders list */}
         <div className="w-full md:w-5/12 py-4 px-2 bg-gray-100 flex-grow overflow-y-auto">
           <div className="flex flex-row items-center mb-4 md:hidden">
-            {["PLACED", "PREPARING", "READY", "PAST ORDERS"].map((status) => (
+            {["PLACED", "ACCEPTED", "READY", "PICKED_UP"].map((status) => (
               <button
                 key={status}
                 onClick={() => filterOrders(status)}
@@ -139,7 +139,7 @@ const Orders = () => {
         {/* Right side: Order details */}
         <div className="hidden md:block w-full md:w-2/3 py-4 bg-gray-100 h-screen flex flex-col">
           <div className="hidden md:flex flex-row mb-2">
-            {["PLACED", "PREPARING", "READY", "PAST ORDERS"].map((status) => (
+            {["PLACED", "ACCEPTED", "READY", "PICKED_UP"].map((status) => (
               <button
                 key={status}
                 onClick={() => filterOrders(status)}

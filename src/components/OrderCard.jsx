@@ -1,10 +1,58 @@
 import { FiPrinter } from "react-icons/fi";
+import { useUpdateOrderMutation } from "../app/Apis/FoodApi";
+import { useGetOrdersQuery } from "../app/Apis/FoodApi";
+import { useSelector } from "react-redux";
 
 const OrderCard = ({ order, getFoodItemDetails, getAddonDetails }) => {
+  const [updateOrder] = useUpdateOrderMutation();
+  
+
+  const { refetch: refetchOrders } = useGetOrdersQuery();
+   const hotelId = useSelector((state) => state.auth.restaurant_id);
   if (!order) {
     return <p className="text-gray-600">Select an order to see details</p>;
   }
   console.log(order)
+
+  const getNextStatus = (currentStatus) => {
+    switch (currentStatus) {
+      case "PLACED":
+        return "ACCEPTED";
+      case "ACCEPTED":
+        return "READY";
+      case "READY":
+        return "PICKED_UP";
+      default:
+        return null;
+    }
+  };
+  const getButtonText = (currentStatus) => {
+    switch (currentStatus) {
+      case "PLACED":
+        return "Accept Order";
+      case "ACCEPTED":
+        return "Ready for Pickup";
+      case "READY":
+        return "Order Picked Up";
+      default:
+        return null;
+    }
+  };
+  const buttonText = getButtonText(order.order_status);
+
+   const handleStatusUpdate = async () => {
+     const nextStatus = getNextStatus(order.order_status);
+     if (nextStatus) {
+       try {
+         await updateOrder({ orderId: order.order_id, orderStatus: nextStatus });
+         //  refetchOrders({ order_status: nextStatus, hotelId: hotelId });
+        refetchOrders({ orderStatus: nextStatus, hotelId }); 
+
+       } catch (error) {
+         console.error("Failed to update order status", error);
+       }
+     }
+   };
 
   return (
     <div className="flex flex-col h-full p-4 border rounded-lg bg-white mb-4">
@@ -84,9 +132,17 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails }) => {
             <button className="bg-red-800 text-white py-2 px-6 rounded-lg">
               Reject Order
             </button>
-            <button className="bg-blue-900 text-white py-2 px-6 rounded-lg">
+            {/* <button className="bg-blue-900 text-white py-2 px-6 rounded-lg">
               Accept Order
-            </button>
+            </button> */}
+            {buttonText && (
+                <button
+                  className="bg-blue-900 text-white py-2 px-6 rounded-lg"
+                  onClick={handleStatusUpdate}
+                >
+                  {buttonText}
+                </button>
+            )}
           </div>
         </div>
       </div>
