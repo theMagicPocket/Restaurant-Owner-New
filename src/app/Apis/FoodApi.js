@@ -49,6 +49,16 @@ export const FoodApi = createApi({
       }),
       invalidatesTags: ["Order"], // This ensures the orders list is updated
     }),
+
+    postVoucher: builder.mutation({
+      query: (data) => ({
+        url: "v1/vouchers",
+        method: "POST",
+        data
+      })
+    })
+
+
   }),
 });
 
@@ -57,4 +67,5 @@ export const {
   usePostDishMutation,
   useGetOrdersQuery,
   useUpdateOrderMutation,
+  usePostVoucherMutation
 } = FoodApi;
