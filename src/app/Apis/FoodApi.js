@@ -56,8 +56,42 @@ export const FoodApi = createApi({
         method: "POST",
         data
       })
-    })
+    }),
+    getAllVouchers: builder.query({
+      query: () => ({
+        url: "v1/vouchers/",
+        method: "GET",
+      }),
+      providesTags: ["Voucher"],
+    }),
 
+    // Get a single voucher by ID
+    getVoucherById: builder.query({
+      query: (voucherId) => ({
+        url: `v1/vouchers/${voucherId}`,
+        method: "GET",
+      }),
+      providesTags: ["Voucher"],
+    }),
+
+    // Update a voucher by ID
+    updateVoucher: builder.mutation({
+      query: ({ voucherId, data }) => ({
+        url: `v1/vouchers/${voucherId}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["Voucher"],
+    }),
+
+    // Delete a voucher by ID
+    deleteVoucher: builder.mutation({
+      query: (voucherId) => ({
+        url: `v1/vouchers/${voucherId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Voucher"],
+    }),
 
   }),
 });
@@ -67,5 +101,9 @@ export const {
   usePostDishMutation,
   useGetOrdersQuery,
   useUpdateOrderMutation,
-  usePostVoucherMutation
+  usePostVoucherMutation,
+  useGetAllVouchersQuery,
+  useGetVoucherByIdQuery,
+  useUpdateVoucherMutation,
+  useDeleteVoucherMutation,
 } = FoodApi;
