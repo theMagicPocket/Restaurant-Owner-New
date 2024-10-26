@@ -240,7 +240,7 @@ const AddDishForm = () => {
           <form>
             <label className="block mb-4">
               <span className="text-gray-700">Is this item an Addon?</span>
-              <div className="flex items-center">
+              <div className="flex items-center mt-2">
                 <label className="mr-4">
                   <input
                     type="radio"
@@ -252,6 +252,7 @@ const AddDishForm = () => {
                       setIsAddonItem(true);
                       setAddonsEnabled(false);
                     }}
+                    className="mr-1"
                   />
                   Yes
                 </label>
@@ -267,6 +268,7 @@ const AddDishForm = () => {
                       setIsAddonItem(false);
                       setAddonsEnabled(true);
                     }}
+                    className="mr-1"
                   />
                   No
                 </label>
@@ -371,7 +373,7 @@ const AddDishForm = () => {
             {addonsEnabled && (
               <div className="block mb-4">
                 <span className="text-gray-700">Select Addons</span>
-                <div className="block w-full border border-gray-300 rounded-md shadow-sm p-2 h-48 overflow-auto">
+                <div className="block w-full border border-gray-300 rounded-md shadow-sm p-2 h-48 overflow-auto mt-2">
                   {foodItems?.data
                     .filter((item) => item.is_addon) // Filter to get only addons
                     .map((addon) => (

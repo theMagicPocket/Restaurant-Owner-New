@@ -6,6 +6,8 @@ import {
   FaQuestionCircle,
   FaSignOutAlt,
   FaTimes,
+  FaGift,
+  FaPlus,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -72,14 +74,14 @@ const Sidenavbar = ({ onClose }) => {
           onItemClicked={handleItemClick}
         />
         <SidebarItem
-          icon={<FaUtensils />}
+          icon={<FaPlus />}
           label="Add Dish"
           path="/add"
           activeItem={activeItem}
           onItemClicked={handleItemClick}
         />
         <SidebarItem
-          icon={<FaUtensils />}
+          icon={<FaGift />}
           label="Manage Vouchers"
           path="/vouchers"
           activeItem={activeItem}

@@ -13,6 +13,7 @@ import { useGetAllVouchersQuery } from "../../app/Apis/FoodApi";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { useDeleteVoucherMutation } from "../../app/Apis/FoodApi";
 import Snackbar from "../../components/Snackbar";
+import { useUpdateVoucherMutation } from "../../app/Apis/FoodApi";
 
 const Vouchers = () => {
   const { data: vouchers, refetch } = useGetAllVouchersQuery();
@@ -23,6 +24,7 @@ const Vouchers = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
    const [snackbarType, setSnackbarType] = useState("success"); 
   const [editingVoucher, setEditingVoucher] = useState(null);
+  const [updateVoucher] = useUpdateVoucherMutation();
   const handleToggleForm = () => {
     setIsFormOpen(!isFormOpen);
     if (!isFormOpen) setEditingVoucher(null); // Reset editing mode if closing form
@@ -33,14 +35,20 @@ const Vouchers = () => {
    };
 
   // Function to toggle voucher status
-  const toggleVoucherStatus = () => {
-    // setVouchers((prevVouchers) =>
-    //   prevVouchers.map((voucher) =>
-    //     voucher.id === id
-    //       ? { ...voucher, isActive: !voucher.isActive }
-    //       : voucher
-    //   )
-    // );
+  const toggleVoucherStatus = async (voucherId, currentStatus) => {
+    try {
+      await updateVoucher({
+        voucherId,
+        data: { is_active: !currentStatus },
+      }).unwrap();
+      refetch();
+      setSnackbarMessage("Voucher status updated successfully.");
+      setSnackbarType("success");
+    } catch (error) {
+      setSnackbarMessage("Failed to update voucher status, please try again.");
+      setSnackbarType("error");
+      console.log(error);
+    }
   };
 
   const handleDeleteVoucher = async (voucherId) => {
@@ -187,12 +195,10 @@ const Vouchers = () => {
 
                   {/* Toggle Button */}
                   <button
-                    onClick={() => toggleVoucherStatus(voucher.id)}
-                    className={`mt-2 flex items-center justify-center p-2 rounded-full shadow transition duration-200 ${
-                      voucher.is_active
-                        ? "bg-blue-500 hover:bg-blue-600 text-white"
-                        : "bg-gray-300 hover:bg-gray-400 text-gray-700"
-                    }`}
+                    onClick={() =>
+                      toggleVoucherStatus(voucher.id, voucher.is_active)
+                    }
+                    className={`mt-2 flex items-center justify-center p-2 rounded-full shadow transition duration-200 ${voucher.is_active ? "bg-blue-500 hover:bg-blue-600 text-white" : "bg-gray-300 hover:bg-gray-400 text-gray-700"}`}
                   >
                     {voucher.is_active ? (
                       <FaToggleOn size={20} />
