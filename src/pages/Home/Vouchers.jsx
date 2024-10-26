@@ -20,10 +20,17 @@ const Vouchers = () => {
   const [isFormOpen, setIsFormOpen] = useState(false); // Form toggle state
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const [deleteVoucher] = useDeleteVoucherMutation();
-  const handleToggleForm = () => setIsFormOpen(!isFormOpen);
   const [snackbarMessage, setSnackbarMessage] = useState("");
    const [snackbarType, setSnackbarType] = useState("success"); 
-
+  const [editingVoucher, setEditingVoucher] = useState(null);
+  const handleToggleForm = () => {
+    setIsFormOpen(!isFormOpen);
+    if (!isFormOpen) setEditingVoucher(null); // Reset editing mode if closing form
+  };
+   const editVoucher = (voucher) => {
+     setEditingVoucher(voucher);
+     setIsFormOpen(true); // Open the form in editing mode
+   };
 
   // Function to toggle voucher status
   const toggleVoucherStatus = () => {
@@ -81,25 +88,20 @@ const Vouchers = () => {
         <div className="mt-4 mb-8 bg-white p-8 rounded-lg shadow-lg w-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Vouchers</h2>
-            {!isFormOpen ? (
-              <button
-                onClick={handleToggleForm}
-                className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition duration-200"
-              >
-                <FaPlus size={15} />
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsFormOpen(false)}
-                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200"
-              >
-                Back
-              </button>
-            )}
+            <button
+              onClick={handleToggleForm}
+              className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition duration-200"
+            >
+              {isFormOpen ? "Back" : <FaPlus size={15} />}
+            </button>
           </div>
 
           {isFormOpen ? (
-            <AddVoucher onClose={handleToggleForm} refetch={refetch} /> // Render the form
+            <AddVoucher
+              onClose={handleToggleForm}
+              refetch={refetch}
+              voucher={editingVoucher}
+            /> // Pass voucher as prop for editing
           ) : (
             // Display vouchers in a grid
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 relative">
@@ -111,7 +113,7 @@ const Vouchers = () => {
                   {/* Top-right edit and delete icons */}
                   <div className="absolute top-4 right-4 flex space-x-2">
                     <button
-                      onClick={() => editVoucher(voucher.id)}
+                      onClick={() => editVoucher(voucher)}
                       className="p-1 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white transition duration-200"
                     >
                       <PencilIcon className="w-5 h-5" />
