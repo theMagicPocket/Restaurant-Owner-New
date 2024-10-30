@@ -14,11 +14,27 @@ export const FoodApi = createApi({
       }),
       providesTags: ["FoodItem"],
     }),
+    
     postDish: builder.mutation({
       query: (data) => ({
         url: "v1/fooditems/",
         method: "POST",
         data,
+      }),
+      invalidatesTags: ["FoodItem"],
+    }),
+    updateFoodItem: builder.mutation({
+      query: ({ foodItemId, data }) => ({
+        url: `v1/fooditems/${foodItemId}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["FoodItem"], // Ensures the food items list is updated
+    }),
+    deleteFoodItem: builder.mutation({
+      query: (itemId) => ({
+        url: `v1/fooditems/${itemId}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["FoodItem"],
     }),
@@ -54,8 +70,8 @@ export const FoodApi = createApi({
       query: (data) => ({
         url: "v1/vouchers",
         method: "POST",
-        data
-      })
+        data,
+      }),
     }),
     getAllVouchers: builder.query({
       query: () => ({
@@ -92,13 +108,14 @@ export const FoodApi = createApi({
       }),
       invalidatesTags: ["Voucher"],
     }),
-
   }),
 });
 
 export const {
   useGetFoodItemsQuery,
   usePostDishMutation,
+  useUpdateFoodItemMutation,
+  useDeleteFoodItemMutation,
   useGetOrdersQuery,
   useUpdateOrderMutation,
   usePostVoucherMutation,

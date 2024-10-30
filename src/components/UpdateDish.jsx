@@ -1,61 +1,32 @@
-import { FaBars, FaTimes } from "react-icons/fa";
+
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setdishData } from "../../app/slices/restaurant/Postdish";
-import { usePostDishMutation } from "../../app/Apis/FoodApi";
-import Sidenavbar from "../../components/Sidenavbar";
+import {setdishData} from "../app/slices/restaurant/Postdish"
+import { usePostDishMutation } from "../app/Apis/FoodApi";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getStorage } from "firebase/storage";
 import app from "../../firebase";
-import Snackbar from "../../components/Snackbar";
-import { useGetFoodItemsQuery } from "../../app/Apis/FoodApi";
-import { useRef } from "react";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { useUpdateFoodItemMutation } from "../../app/Apis/FoodApi";
-const AddDishForm = () => {
-  const dispatch = useDispatch();
-  const [postDish] = usePostDishMutation();
-  const [restaurantImage, setRestaurantImage] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
-  const [selectedCategories, setSelectedCategories] = useState([]); // State for categories
-  const [addonsEnabled, setAddonsEnabled] = useState(true); // If the item can have addons
-  const [isAddonItem, setIsAddonItem] = useState(false); // State to check if the item is an addon
-  const [selectedAddons, setSelectedAddons] = useState([]); // Selected addons (multiple options)
-  const { data: foodItems } = useGetFoodItemsQuery();
-  const dishdata = useSelector((RootState) => RootState.PostDishdata);
-  const [errors, setErrors] = useState({});
-  const storage = getStorage(app);
-  const restaurant_id = useSelector((state) => state.auth.restaurant_id);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarType, setSnackbarType] = useState("success");
-  const fileInputRef = useRef(null);
-  const location = useLocation();
-  const [updateDish, { isLoading: isUpdating }] = useUpdateFoodItemMutation();
-  // const [isEditingImage, setIsEditingImage] = useState(false);
-  const [imagePreview, setImagePreview] = useState("");
-  const [previousImagePreview, setPreviousImagePreview] =
-    useState(imagePreview);
+import Snackbar from "./Snackbar";
+import { useGetFoodItemsQuery } from "../app/Apis/FoodApi";
 
-  useEffect(() => {
-    if (location.state?.item) {
-      const item = location.state.item;
-      // Prefill data for edit mode
-      dispatch(
-        setdishData({
-          ...item,
-          addons: item.addons || [],
-          category: item.category || [],
-        })
-      );
-      setIsAddonItem(item.is_addon);
-      setSelectedCategories(item.category || []);
-      setSelectedAddons(item.addons || []);
-      setRestaurantImage(null);
-      setImagePreview(item.photo || "");
-      // setOriginalImagePreview(item.photo || "");
-    }
-  }, [location.state, dispatch]);
+import { useRef } from "react";
+
+const UpdateDish = () => {
+  // const dispatch = useDispatch();
+  // const [postDish] = usePostDishMutation();
+  // const [restaurantImage, setRestaurantImage] = useState(null);
+  // const [selectedCategories, setSelectedCategories] = useState([]); // State for categories
+  // const [addonsEnabled, setAddonsEnabled] = useState(true); // If the item can have addons
+  // const [isAddonItem, setIsAddonItem] = useState(false); // State to check if the item is an addon
+  // const [selectedAddons, setSelectedAddons] = useState([]); // Selected addons (multiple options)
+  // const { data: foodItems } = useGetFoodItemsQuery();
+  // const dishdata = useSelector((RootState) => RootState.PostDishdata);
+  // const [errors, setErrors] = useState({});
+  // const storage = getStorage(app);
+  // const restaurant_id = useSelector((state) => state.auth.restaurant_id);
+  // const [snackbarMessage, setSnackbarMessage] = useState("");
+  // const [snackbarType, setSnackbarType] = useState("success");
+  // const fileInputRef = useRef(null);
 
   const categories = [
     "Biriyani",
@@ -107,24 +78,18 @@ const AddDishForm = () => {
       if (!allowedTypes.includes(file.type)) {
         setErrors({
           ...errors,
-          photos: "Please upload a valid image (JPG/PNG/JPEG).",
+          photos: "Please upload a valid image (JPG/PNG).",
         });
         return;
       }
       setRestaurantImage(file);
       // Clear any previous image errors
       setErrors({ ...errors, photos: "" });
-      const reader = new FileReader();
-      reader.onload = () => setImagePreview(reader.result);
-      reader.readAsDataURL(file);
-      setPreviousImagePreview(reader.result);
     } else {
-      setImagePreview(previousImagePreview);
       setErrors({ ...errors, photos: "Restaurant image is required." });
     }
   };
 
-  const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const handleAddonCheckboxChange = (e, addonId) => {
     let updatedAddons;
@@ -157,65 +122,33 @@ const AddDishForm = () => {
     console.log(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  const handleEditImageClick = () => {
-    setPreviousImagePreview(imagePreview); // Save current preview before file picker opens
-    fileInputRef.current.click(); // Open file picker
-  };
+
   const handleSave = async () => {
     try {
       if (!validateForm()) return;
 
-      if (location.state?.item) {
-        const categoryData = isAddonItem ? ["Others"] : selectedCategories;
-        let imageUrl = imagePreview; // Default to the existing preview
-        if (restaurantImage && restaurantImage !== imagePreview) {
-          const storageRef = ref(storage, `Menu/${restaurantImage.name}`);
-          const snapshot = await uploadBytes(storageRef, restaurantImage);
-          imageUrl = await getDownloadURL(snapshot.ref);
-        }
-        const updatedDishData = {
-          item_name: dishdata.item_name,
-          description: dishdata.description,
-          hotel_id: dishdata.hotel_id,
-          price: dishdata.price,
-          addons: dishdata.addons,
-          photo: imageUrl, // Assign photo if it exists in dishdata
-          is_veg: dishdata.is_veg,
-          is_addon: dishdata.is_addon,
-          is_active: dishdata.is_active,
-          category: categoryData, // Use the provided categoryData
-        };
-        const item = location.state.item;
-        console.log("checking updated dish data");
-        console.log(updatedDishData);
-        await updateDish({
-          foodItemId: item.id,
-          data: updatedDishData,
-        }).unwrap();
-      } else {
-        let imageUrl = "";
-        if (restaurantImage) {
-          const storageRef = ref(storage, `Menu/${restaurantImage.name}`);
-          const snapshot = await uploadBytes(storageRef, restaurantImage);
-          imageUrl = await getDownloadURL(snapshot.ref);
-          console.log("Image uploaded:", imageUrl);
-        }
-
-        const categoryData = isAddonItem ? ["Others"] : selectedCategories;
-
-        const updatedDishData = {
-          ...dishdata,
-          photo: imageUrl, // Add image URL to register data
-          hotel_id: restaurant_id,
-          category: categoryData,
-        };
-        console.log(restaurant_id);
-        console.log("dish data");
-        console.log(updatedDishData);
-        // Uncomment the following to actually post the dish
-        const response = await postDish(updatedDishData).unwrap();
-        console.log("Dish saved", response);
+      let imageUrl = "";
+      if (restaurantImage) {
+        const storageRef = ref(storage, `Menu/${restaurantImage.name}`);
+        const snapshot = await uploadBytes(storageRef, restaurantImage);
+        imageUrl = await getDownloadURL(snapshot.ref);
+        console.log("Image uploaded:", imageUrl);
       }
+
+      const categoryData = isAddonItem ? ["Others"] : selectedCategories;
+
+      const updatedDishData = {
+        ...dishdata,
+        photo: imageUrl, // Add image URL to register data
+        hotel_id: restaurant_id,
+        category: categoryData,
+      };
+      console.log(restaurant_id);
+      console.log("dish data");
+      console.log(updatedDishData);
+      // Uncomment the following to actually post the dish
+      const response = await postDish(updatedDishData).unwrap();
+      console.log("Dish saved", response);
       dispatch(
         setdishData({
           item_name: "",
@@ -238,13 +171,7 @@ const AddDishForm = () => {
       setSelectedCategories([]); // Reset selected categories
       setAddonsEnabled(false); // Reset addon state if needed
       setSelectedAddons([]); // Reset selected addons
-      setImagePreview(null);
-      if (location.state?.item) {
-        setSnackbarMessage("Menu item updated successfully.");
-      } else {
-        setSnackbarMessage("Menu item added successfully.");
-      }
-
+      setSnackbarMessage("Menu item added successfully.");
       setSnackbarType("success");
     } catch (error) {
       console.log(error);
@@ -278,19 +205,6 @@ const AddDishForm = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
-      <button
-        onClick={handleToggleSidebar}
-        className="md:hidden p-4 text-gray-600 focus:outline-none"
-      >
-        {isSidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-      </button>
-
-      <div
-        className={` ${isSidebarOpen ? "block" : "hidden"} md:block fixed md:relative z-10 w-full md:w-auto`}
-      >
-        <Sidenavbar onClose={handleToggleSidebar} />
-      </div>
-
       <Snackbar
         message={snackbarMessage}
         type={snackbarType}
@@ -349,6 +263,7 @@ const AddDishForm = () => {
                 <p className="text-red-600">{errors.item_name}</p>
               )}
             </label>
+
             <label className="block mb-4">
               <span className="text-gray-700">Description</span>
               <textarea
@@ -360,6 +275,7 @@ const AddDishForm = () => {
                 <p className="text-red-600">{errors.description}</p>
               )}
             </label>
+
             <label className="block mb-4">
               <span className="text-gray-700">Dish Price</span>
               <input
@@ -373,33 +289,15 @@ const AddDishForm = () => {
 
             <label className="block mb-4">
               <span className="text-gray-700">Dish Image</span>
-
-              {/* Show current image preview if available and not in editing mode */}
-              {imagePreview && (
-                <div className="relative mb-4">
-                  <img
-                    src={imagePreview}
-                    alt="Dish Preview"
-                    className="w-32 h-32 object-cover rounded-md"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleEditImageClick}
-                    className="absolute top-0 right-0 p-1 bg-gray-200 rounded-full hover:bg-gray-300"
-                  >
-                    Edit Image
-                  </button>
-                </div>
-              )}
-
-              {/* Hidden file input */}
               <input
                 type="file"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 ref={fileInputRef}
-                // className="hidden"
                 onChange={handleImageChange}
               />
+              {errors.photos && <p className="text-red-600">{errors.photos}</p>}
             </label>
+
             <label className="block mb-4">
               <span className="text-gray-700">Veg / Non-Veg</span>
               <select
@@ -412,6 +310,7 @@ const AddDishForm = () => {
               </select>
               {errors.is_veg && <p className="text-red-600">{errors.is_veg}</p>}
             </label>
+
             {addonsEnabled && (
               <label className="block mb-4">
                 <span className="text-gray-700">
@@ -447,6 +346,7 @@ const AddDishForm = () => {
                 )}
               </label>
             )}
+
             {addonsEnabled && (
               <div className="block mb-4">
                 <span className="text-gray-700">Select Addons</span>
@@ -494,12 +394,13 @@ const AddDishForm = () => {
                 )}
               </div>
             )}
+
             <button
               type="button"
               className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"
               onClick={handleSave}
             >
-              {location.state?.item ? "Update Dish" : "Save Dish"}
+              Save Dish
             </button>
           </form>
         </div>
@@ -508,4 +409,4 @@ const AddDishForm = () => {
   );
 };
 
-export default AddDishForm;
+export default UpdateDish;

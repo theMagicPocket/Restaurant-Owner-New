@@ -1,11 +1,18 @@
 
-import { FaTrashAlt, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { FaTrashAlt, FaToggleOn, FaToggleOff, FaEdit } from "react-icons/fa";
 import { useState} from "react";
 import PropTypes from "prop-types";
-
+import { useDeleteFoodItemMutation } from "../app/Apis/FoodApi";
+import Snackbar from "./Snackbar";
+import { useNavigate } from "react-router-dom";
 
 const FoodItemCard = ({ item, addons }) => {
+  const navigate = useNavigate();
   const [isAvailable, setIsAvailable] = useState(item.is_active);
+  const [deletefooditem] = useDeleteFoodItemMutation();
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("success"); 
+
   const toggleAvailability = async () => {
     const confirmed = window.confirm(
       `Are you sure you want to ${isAvailable ? "turn off" : "turn on"} this item?`
@@ -14,14 +21,50 @@ const FoodItemCard = ({ item, addons }) => {
       setIsAvailable(!isAvailable);
     }
   };
+  const handleDeleteItem = async (itemId) => {
+    console.log(item)
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this food item from menu?"
+    );
+    if (!isConfirmed) return;
+    try {
+      await deletefooditem(itemId).unwrap();
+      setSnackbarMessage("Food Item deleted successfully");
+      setSnackbarType("success");
+    } catch (error) {
+      setSnackbarMessage("Failed to delete food item, please try again.");
+      setSnackbarType("error");
+      console.log(error);
+    }
+  };
+  const handleEditClick = () => {
+    console.log("checking")
+    console.log(item)
+    console.log(addons)
+   navigate(`/edit/${item.id}`, { state: { item, addons } });// Navigate to edit route with item ID
+  };
 
   return (
     // w-full sm:w-60 md:w-72 lg:w-80 mb-4
     <div className="flex flex-col shadow-md bg-white rounded-lg p-4  relative hover:shadow-lg transition-all">
       {/* Top Action Buttons */}
+      <Snackbar
+        message={snackbarMessage}
+        type={snackbarType}
+        onClose={() => setSnackbarMessage("")} // Clear message on close
+      />
       <div className="absolute top-2 right-2 flex gap-2">
-        <button className="p-1 hover:bg-gray-200 rounded-full">
+        <button
+          className="p-1 hover:bg-gray-200 rounded-full"
+          onClick={() => handleDeleteItem(item.id)}
+        >
           <FaTrashAlt className="text-red-500" />
+        </button>
+        <button
+          className="p-1 hover:bg-gray-200 rounded-full"
+          onClick={handleEditClick}
+        >
+          <FaEdit className="text-blue-500" />
         </button>
         <button
           onClick={toggleAvailability}
@@ -49,10 +92,12 @@ const FoodItemCard = ({ item, addons }) => {
           {item.item_name}
         </h2>
         <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-        
-        {!item.is_addon && (<p className="text-sm text-gray-600 mt-1">
-          Category: {item.category.join(", ")}
-        </p>)}
+
+        {!item.is_addon && (
+          <p className="text-sm text-gray-600 mt-1">
+            Category: {item.category.join(", ")}
+          </p>
+        )}
       </div>
 
       {/* Price and Veg/Non-Veg */}
@@ -109,6 +154,7 @@ const FoodItemCard = ({ item, addons }) => {
 FoodItemCard.propTypes = {
   item: PropTypes.shape({
     item_name: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
     photo: PropTypes.string.isRequired,

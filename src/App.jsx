@@ -179,6 +179,7 @@ function App() {
           <Route path="/orders" element={handlePrivateRoute(Orders)} />
           <Route path="/manage" element={handlePrivateRoute(Dishes)} />
           <Route path="/add" element={handlePrivateRoute(AddDishForm)} />
+          <Route path="/edit/:id" element={handlePrivateRoute(AddDishForm)} />
           <Route
             path="/settings"
             element={handlePrivateRoute(AccountSettings)}

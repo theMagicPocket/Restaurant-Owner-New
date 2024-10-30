@@ -65,10 +65,6 @@ const Dishes = () => {
     ],
   };
 
-  // Filter food items based on the selected category
-  // const filteredFoodItems = data?.data.filter((item) =>
-  //   item.category.includes(categories[selectedCategory])
-  // );
 
   const filteredFoodItems = data?.data.filter((item) => {
     if (selectedCategory === 0) {
@@ -78,11 +74,6 @@ const Dishes = () => {
       // For "AddOns" category, return only items that are add-ons
       return item.is_addon === true;
     }
-    // else if (categories[selectedCategory] === "thers") {
-    //   console.log(categories[selectedCategory]);
-    //   // For "Others" category, return items with category "Others" and not add-ons
-    //   return item.category === "Others" && item.is_addon === false;
-    // }
     else {
       // For all other categories, return items in the selected category and exclude add-ons
       return (
@@ -91,6 +82,8 @@ const Dishes = () => {
       );
     }
   });
+
+  
  
   
   return (
