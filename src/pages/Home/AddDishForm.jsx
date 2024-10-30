@@ -10,9 +10,10 @@ import app from "../../firebase";
 import Snackbar from "../../components/Snackbar";
 import { useGetFoodItemsQuery } from "../../app/Apis/FoodApi";
 import { useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useUpdateFoodItemMutation } from "../../app/Apis/FoodApi";
+import { useGetFoodItemByIdQuery } from "../../app/Apis/FoodApi";
 const AddDishForm = () => {
   const dispatch = useDispatch();
   const [postDish] = usePostDishMutation();
@@ -36,6 +37,9 @@ const AddDishForm = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [previousImagePreview, setPreviousImagePreview] =
     useState(imagePreview);
+  //  const { id } = useParams(); // Assuming you pass food item ID as a route param
+  // const { data: foodItemData, isLoading, error } = useGetFoodItemByIdQuery(id);
+
 
   useEffect(() => {
     if (location.state?.item) {
@@ -56,6 +60,56 @@ const AddDishForm = () => {
       // setOriginalImagePreview(item.photo || "");
     }
   }, [location.state, dispatch]);
+
+  useEffect(() => {
+    // Clear the location.state.item when the component mounts
+    // window.history.replaceState({}, "");
+    // dispatch(
+    //   setdishData({
+    //     item_name: "",
+    //     description: "",
+    //     hotel_id: "",
+    //     price: "",
+    //     addons: [],
+    //     photo: "",
+    //     is_veg: false,
+    //     is_addon: true,
+    //     is_active: true,
+    //     category: [],
+    //   })
+    // );
+
+    return () => {
+      // Optionally, you could clear it again on unmount
+      window.history.replaceState({}, "");
+      dispatch(
+        setdishData({
+          item_name: "",
+          description: "",
+          hotel_id: "",
+          price: "",
+          addons: [],
+          photo: "",
+          is_veg: false,
+          is_addon: false,
+          is_active: true,
+          category: [],
+        })
+      );
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset the file input
+      }
+      setIsAddonItem(false);
+      setRestaurantImage(null); // Reset the image file
+      setSelectedCategories([]); // Reset selected categories
+      // setAddonsEnabled(false); // Reset addon state if needed
+      setSelectedAddons([]); // Reset selected addons
+      setImagePreview(null);
+     
+    };
+  }, [location.pathname, dispatch]);
+
+  
 
   const categories = [
     "Biriyani",
@@ -150,7 +204,7 @@ const AddDishForm = () => {
     if (!dishdata.description)
       newErrors.description = "Description is required.";
     if (!dishdata.price) newErrors.price = "Price is required.";
-    if (!restaurantImage) newErrors.photos = "Restaurant Image is required.";
+    if (!restaurantImage ) newErrors.photos = "Restaurant Image is required.";
     if (isAddonItem === false && selectedCategories.length === 0)
       newErrors.category = "At least one category must be selected.";
     setErrors(newErrors);
@@ -225,7 +279,7 @@ const AddDishForm = () => {
           addons: [],
           photo: "",
           is_veg: false,
-          is_addon: true,
+          is_addon: false,
           is_active: true,
           category: [],
         })
@@ -257,7 +311,7 @@ const AddDishForm = () => {
           addons: [],
           photo: "",
           is_veg: false,
-          is_addon: true,
+          is_addon: false,
           is_active: true,
           category: [],
         })
@@ -393,12 +447,14 @@ const AddDishForm = () => {
               )}
 
               {/* Hidden file input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                // className="hidden"
-                onChange={handleImageChange}
-              />
+              {imagePreview === "" && (
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  // className="hidden"
+                  onChange={handleImageChange}
+                />
+              )}
             </label>
             <label className="block mb-4">
               <span className="text-gray-700">Veg / Non-Veg</span>

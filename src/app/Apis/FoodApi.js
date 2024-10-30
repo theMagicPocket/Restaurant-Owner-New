@@ -14,7 +14,15 @@ export const FoodApi = createApi({
       }),
       providesTags: ["FoodItem"],
     }),
-    
+
+    getFoodItemById: builder.query({
+      query: (id) => ({
+        url: `v1/fooditems/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["FoodItemById"],
+    }),
+
     postDish: builder.mutation({
       query: (data) => ({
         url: "v1/fooditems/",
@@ -113,6 +121,7 @@ export const FoodApi = createApi({
 
 export const {
   useGetFoodItemsQuery,
+  useGetFoodItemByIdQuery,
   usePostDishMutation,
   useUpdateFoodItemMutation,
   useDeleteFoodItemMutation,
