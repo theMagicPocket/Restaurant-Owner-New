@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { useDeleteFoodItemMutation } from "../app/Apis/FoodApi";
 import Snackbar from "./Snackbar";
 import { useNavigate } from "react-router-dom";
+import { useUpdateFoodItemMutation } from "../app/Apis/FoodApi";
 
 const FoodItemCard = ({ item, addons }) => {
   const navigate = useNavigate();
@@ -12,15 +13,32 @@ const FoodItemCard = ({ item, addons }) => {
   const [deletefooditem] = useDeleteFoodItemMutation();
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarType, setSnackbarType] = useState("success"); 
+  const [updateDish, { isLoading: isUpdating }] = useUpdateFoodItemMutation();
 
-  const toggleAvailability = async () => {
+  const toggleAvailability = async (foodItemId, currentStatus) => {
     const confirmed = window.confirm(
-      `Are you sure you want to ${isAvailable ? "turn off" : "turn on"} this item?`
+      `Are you sure you want to ${currentStatus ? "turn off" : "turn on"} this item?`
     );
-    if (confirmed) {
-      setIsAvailable(!isAvailable);
+
+    if (!confirmed) return; // Exit if the user doesn't confirm
+    console.log("this check")
+    // console.log(itemId)
+    console.log(currentStatus)
+    try {
+      await updateDish({
+        foodItemId,
+        data: { is_active: !currentStatus },
+      }).unwrap();
+      setIsAvailable(!currentStatus); // Update state only if API call succeeds
+      setSnackbarMessage("Food Item status updated successfully.");
+      setSnackbarType("success");
+    } catch (error) {
+      setSnackbarMessage("Failed to update item availability, please try again.");
+      setSnackbarType("error");
+      console.error("Failed to update item availability:", error);
     }
   };
+
   const handleDeleteItem = async (itemId) => {
     console.log(item)
     const isConfirmed = window.confirm(
@@ -67,7 +85,7 @@ const FoodItemCard = ({ item, addons }) => {
           <FaEdit className="text-blue-500" />
         </button>
         <button
-          onClick={toggleAvailability}
+          onClick={() => toggleAvailability(item.id, isAvailable)}
           className="p-1 hover:bg-gray-200 rounded-full"
         >
           {isAvailable ? (

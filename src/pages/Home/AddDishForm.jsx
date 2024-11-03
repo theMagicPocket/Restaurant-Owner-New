@@ -10,10 +10,9 @@ import app from "../../firebase";
 import Snackbar from "../../components/Snackbar";
 import { useGetFoodItemsQuery } from "../../app/Apis/FoodApi";
 import { useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate} from "react-router-dom";
 import { useEffect } from "react";
 import { useUpdateFoodItemMutation } from "../../app/Apis/FoodApi";
-import { useGetFoodItemByIdQuery } from "../../app/Apis/FoodApi";
 const AddDishForm = () => {
   const dispatch = useDispatch();
   const [postDish] = usePostDishMutation();
@@ -33,12 +32,11 @@ const AddDishForm = () => {
   const fileInputRef = useRef(null);
   const location = useLocation();
   const [updateDish, { isLoading: isUpdating }] = useUpdateFoodItemMutation();
-  // const [isEditingImage, setIsEditingImage] = useState(false);
+  const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState("");
   const [previousImagePreview, setPreviousImagePreview] =
     useState(imagePreview);
-  //  const { id } = useParams(); // Assuming you pass food item ID as a route param
-  // const { data: foodItemData, isLoading, error } = useGetFoodItemByIdQuery(id);
+ 
 
 
   useEffect(() => {
@@ -57,27 +55,13 @@ const AddDishForm = () => {
       setSelectedAddons(item.addons || []);
       setRestaurantImage(null);
       setImagePreview(item.photo || "");
+      setAddonsEnabled(!item.is_addon)
       // setOriginalImagePreview(item.photo || "");
     }
   }, [location.state, dispatch]);
 
   useEffect(() => {
     // Clear the location.state.item when the component mounts
-    // window.history.replaceState({}, "");
-    // dispatch(
-    //   setdishData({
-    //     item_name: "",
-    //     description: "",
-    //     hotel_id: "",
-    //     price: "",
-    //     addons: [],
-    //     photo: "",
-    //     is_veg: false,
-    //     is_addon: true,
-    //     is_active: true,
-    //     category: [],
-    //   })
-    // );
 
     return () => {
       // Optionally, you could clear it again on unmount
@@ -105,7 +89,7 @@ const AddDishForm = () => {
       // setAddonsEnabled(false); // Reset addon state if needed
       setSelectedAddons([]); // Reset selected addons
       setImagePreview(null);
-     
+      
     };
   }, [location.pathname, dispatch]);
 
@@ -204,7 +188,7 @@ const AddDishForm = () => {
     if (!dishdata.description)
       newErrors.description = "Description is required.";
     if (!dishdata.price) newErrors.price = "Price is required.";
-    if (!restaurantImage ) newErrors.photos = "Restaurant Image is required.";
+    if (!restaurantImage && !imagePreview) newErrors.photos = "Restaurant Image is required.";
     if (isAddonItem === false && selectedCategories.length === 0)
       newErrors.category = "At least one category must be selected.";
     setErrors(newErrors);
@@ -287,43 +271,23 @@ const AddDishForm = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = ""; // Reset the file input
       }
-      setIsAddonItem(true);
-      setRestaurantImage(null); // Reset the image file
-      setSelectedCategories([]); // Reset selected categories
-      setAddonsEnabled(false); // Reset addon state if needed
-      setSelectedAddons([]); // Reset selected addons
-      setImagePreview(null);
       if (location.state?.item) {
         setSnackbarMessage("Menu item updated successfully.");
+        navigate("/manage")
       } else {
         setSnackbarMessage("Menu item added successfully.");
       }
+      setIsAddonItem(false);
+      setRestaurantImage(null); // Reset the image file
+      setSelectedCategories([]); // Reset selected categories
+      setAddonsEnabled(true); // Reset addon state if needed
+      setSelectedAddons([]); // Reset selected addons
+      setImagePreview(null);
+      
 
       setSnackbarType("success");
     } catch (error) {
       console.log(error);
-      dispatch(
-        setdishData({
-          item_name: "",
-          description: "",
-          hotel_id: "",
-          price: "",
-          addons: [],
-          photo: "",
-          is_veg: false,
-          is_addon: false,
-          is_active: true,
-          category: [],
-        })
-      );
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""; // Reset the file input
-      }
-      setIsAddonItem(true);
-      setRestaurantImage(null); // Reset the image file
-      setSelectedCategories([]); // Reset selected categories
-      setAddonsEnabled(false); // Reset addon state if needed
-      setSelectedAddons([]); // Reset selected addons
       setSnackbarMessage("Something went wrong. Please try again");
       setSnackbarType("error");
       console.error("Failed to save the dish:", error);
@@ -353,7 +317,11 @@ const AddDishForm = () => {
 
       <div className="flex flex-col pl-4 pr-4 overflow-y-auto flex-grow">
         <div className="mt-8 mb-8 bg-white p-8 rounded-lg shadow-lg w-full">
-          <h2 className="text-xl font-semibold mb-4">Add New Dish</h2>
+          {location.state?.item ? (
+            <h2 className="text-xl font-semibold mb-4">Update Dish</h2>
+          ) : (
+            <h2 className="text-xl font-semibold mb-4">Add New Dish</h2>
+          )}
           <form>
             <label className="block mb-4">
               <span className="text-gray-700">Is this item an Addon?</span>
@@ -447,13 +415,15 @@ const AddDishForm = () => {
               )}
 
               {/* Hidden file input */}
-              {imagePreview === "" && (
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  // className="hidden"
-                  onChange={handleImageChange}
-                />
+              {!imagePreview && (
+                <div className="mt-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="block w-full"
+                  />
+                </div>
               )}
             </label>
             <label className="block mb-4">
