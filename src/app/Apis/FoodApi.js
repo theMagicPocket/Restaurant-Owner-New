@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import axiosBaseQuery from "../network/query";
 
-const BASE_URL = "http://13.235.77.237:4000/";
+const BASE_URL = "https://storeapi.thefoodhunt.in/";
 
 export const FoodApi = createApi({
   reducerPath: "FoodApi",

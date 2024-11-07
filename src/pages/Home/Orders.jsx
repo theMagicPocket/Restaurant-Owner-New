@@ -122,11 +122,6 @@ const Orders = () => {
           />
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              // <div
-              //   key={order.id}
-              //   className="p-4 border rounded-lg bg-white shadow-sm cursor-pointer"
-              //   onClick={() => handleOrderClick(order)}
-              // >
               <div
                 key={order.id}
                 className={`p-4 border rounded-lg bg-white shadow-sm cursor-pointer ${

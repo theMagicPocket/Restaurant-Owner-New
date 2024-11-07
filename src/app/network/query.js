@@ -26,3 +26,4 @@ const axiosBaseQuery = ({ baseURL } = {}) => async ({ url, method = 'GET', data,
 };
 
 export default axiosBaseQuery;
+ 

@@ -71,8 +71,7 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
         console.error("Failed to update order status", error);
       }
     }
-  };
-
+  }; 
 
   return (
     <div className="flex flex-col h-full p-4 border rounded-lg bg-white mb-4">
@@ -99,6 +98,7 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
           {order.order_items.map((item) => {
             const foodItem = getFoodItemDetails(item.fooditem_id);
             const addons = getAddonDetails(item.addons);
+      
 
             return (
               <div key={item.fooditem_id} className="border-b py-2">
@@ -117,10 +117,12 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
                   <div className="mt-1">
                     <p className="text-gray-500 text-sm">Add-ons:</p>
                     {addons.map((addon) => (
+                      
                       <div
                         key={addon.id}
                         className="flex justify-between text-gray-700"
                       >
+                        {/* <p>{addon}</p> */}
                         <p> + {addon.item_name} </p>
                         <p>(₹{addon.price})</p>
                       </div>
