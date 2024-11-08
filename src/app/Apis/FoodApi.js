@@ -13,6 +13,10 @@ export const FoodApi = createApi({
         url: "v1/fooditems/",
       }),
       providesTags: ["FoodItem"],
+      keepUnusedDataFor: 0,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+      refetchOnMountOrArgChange: true,
     }),
 
     getFoodItemById: builder.query({
@@ -87,6 +91,7 @@ export const FoodApi = createApi({
         method: "GET",
       }),
       providesTags: ["Voucher"],
+      keepUnusedDataFor: 0,
     }),
 
     // Get a single voucher by ID
