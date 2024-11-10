@@ -24,6 +24,9 @@ import { setRestaurantId } from "./app/slices/authentication/authSlice";
 import Forgot from "./pages/authentication/Forgot";
 import { useGetByOwnerQuery } from "./app/Apis/RegisterApi";
 import Vouchers from "./pages/Home/Vouchers";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
+import app from "./firebase";
+import { login } from "./app/slices/authentication/authSlice";
 // import axiosInstance from "./axiosInstance";
 function App() {
   const token = useSelector((state) => state.auth.token);
@@ -45,6 +48,24 @@ function App() {
   });
   console.log("outside");
   console.log(hotelData);
+
+    const auth = getAuth(app);
+
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          // Refresh the token whenever the user state changes
+          const token = await user.getIdToken(true); // true forces a refresh of the token
+          const userEmail = user.email;
+          const userId = user.uid;
+
+          dispatch(login({ token, userEmail, userId }));
+        }
+      });
+
+      return () => unsubscribe();
+    }, [auth, dispatch]);
+
 
   useEffect(() => {
     console.log("Token:", token);
