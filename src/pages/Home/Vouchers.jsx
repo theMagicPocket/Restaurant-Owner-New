@@ -5,7 +5,7 @@ import {
   FaToggleOn,
   FaToggleOff,
 } from "react-icons/fa";
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import Sidenavbar from "../../components/Sidenavbar";
 import AddVoucher from "./AddVoucher";
 import { useGetAllVouchersQuery } from "../../app/Apis/FoodApi";
@@ -14,25 +14,48 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { useDeleteVoucherMutation } from "../../app/Apis/FoodApi";
 import Snackbar from "../../components/Snackbar";
 import { useUpdateVoucherMutation } from "../../app/Apis/FoodApi";
+import { useDispatch, useSelector } from "react-redux";
+import { useGetByOwnerQuery } from "../../app/Apis/RegisterApi";
+import { setVouchers } from "../../app/slices/authentication/authSlice";
 
 const Vouchers = () => {
-  const { data: vouchers, refetch } = useGetAllVouchersQuery();
+  const voucherIds = useSelector((state) => state.auth.vouchers);
+  const { data: vouchers, refetch } = useGetAllVouchersQuery(voucherIds, {
+    skip: !voucherIds,
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
   const [isFormOpen, setIsFormOpen] = useState(false); // Form toggle state
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const [deleteVoucher] = useDeleteVoucherMutation();
   const [snackbarMessage, setSnackbarMessage] = useState("");
-   const [snackbarType, setSnackbarType] = useState("success"); 
+  const [snackbarType, setSnackbarType] = useState("success");
   const [editingVoucher, setEditingVoucher] = useState(null);
   const [updateVoucher] = useUpdateVoucherMutation();
+  const userId = useSelector((state) => state.auth.user_id);
+  const { data: hotelData, refetch: refetchHotelData, isSuccess } = useGetByOwnerQuery(
+    userId,
+    { skip: !userId }
+  );
+  const dispatch = useDispatch();
+
+   useEffect(() => {
+     if (isSuccess && hotelData && userId) {
+       // If hotel data is retrieved successfully
+       console.log("useGetByOwnerQuery Api");
+       console.log(hotelData);
+       if (hotelData.data.length !== 0) {
+         dispatch(setVouchers(hotelData.data[0].vouchers))
+       }
+     }
+   }, [userId, refetchHotelData, dispatch, hotelData, isSuccess]);
   const handleToggleForm = () => {
     setIsFormOpen(!isFormOpen);
     if (!isFormOpen) setEditingVoucher(null); // Reset editing mode if closing form
   };
-   const editVoucher = (voucher) => {
-     setEditingVoucher(voucher);
-     setIsFormOpen(true); // Open the form in editing mode
-   };
+  const editVoucher = (voucher) => {
+    setEditingVoucher(voucher);
+    setIsFormOpen(true); // Open the form in editing mode
+  };
 
   // Function to toggle voucher status
   const toggleVoucherStatus = async (voucherId, currentStatus) => {
@@ -55,7 +78,7 @@ const Vouchers = () => {
     const isConfirmed = window.confirm(
       "Are you sure you want to delete this voucher?"
     );
-    if (!isConfirmed) return; 
+    if (!isConfirmed) return;
     try {
       await deleteVoucher(voucherId).unwrap();
       refetch();
@@ -108,6 +131,7 @@ const Vouchers = () => {
             <AddVoucher
               onClose={handleToggleForm}
               refetch={refetch}
+              refetchHotelData= {refetchHotelData}
               voucher={editingVoucher}
             /> // Pass voucher as prop for editing
           ) : (
@@ -220,72 +244,3 @@ const Vouchers = () => {
 };
 
 export default Vouchers;
-
-
-// import { useState } from "react";
-// import {
-//   useGetAllVouchersQuery,
-//   useDeleteVoucherMutation,
-// } from "../../app/Apis/FoodApi";
-// import AddVoucher from "./AddVoucher";
-// import Snackbar from "../../components/Snackbar";
-
-// const Vouchers = () => {
-//   const { data: vouchers, refetch } = useGetAllVouchersQuery();
-//   const [deleteVoucher] = useDeleteVoucherMutation();
-//   const [editVoucher, setEditVoucher] = useState(null); // Stores the voucher to edit
-//   const [snackbarMessage, setSnackbarMessage] = useState("");
-//   const [snackbarType, setSnackbarType] = useState("success");
-
-//   const handleDeleteVoucher = async (voucherId) => {
-//     try {
-//       await deleteVoucher(voucherId).unwrap();
-//       setSnackbarMessage("Voucher deleted successfully");
-//       setSnackbarType("success");
-//       refetch(); // Refresh voucher list
-//     } catch (error) {
-//       setSnackbarMessage("Failed to delete voucher, please try again.");
-//       setSnackbarType("error");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <Snackbar
-//         message={snackbarMessage}
-//         type={snackbarType}
-//         onClose={() => setSnackbarMessage("")}
-//       />
-
-//       <h3 className="text-lg font-semibold mb-4">All Vouchers</h3>
-//       {vouchers?.data.map((voucher) => (
-//         <div key={voucher.id} className="p-2 mb-2 border-b">
-//           <h4>{voucher.voucher_name}</h4>
-//           <p>Code: {voucher.voucher_code}</p>
-//           <button
-//             onClick={() => setEditVoucher(voucher)} // Set voucher to be edited
-//             className="text-blue-500"
-//           >
-//             Edit
-//           </button>
-//           <button
-//             onClick={() => handleDeleteVoucher(voucher.id)}
-//             className="text-red-500 ml-4"
-//           >
-//             Delete
-//           </button>
-//         </div>
-//       ))}
-
-//       <AddVoucher
-//         voucherData={editVoucher} // Pass selected voucher data to AddVoucher
-//         onSave={() => {
-//           setEditVoucher(null); // Reset edit mode
-//           refetch(); // Refresh vouchers list after save
-//         }}
-//       />
-//     </div>
-//   );
-// };
-
-// export default Vouchers;

@@ -8,9 +8,11 @@ import "slick-carousel/slick/slick-theme.css";
 import PropTypes from "prop-types";
 import FoodItemCard from "../../components/FoodItemCard";
 import { useGetFoodItemsQuery } from "../../app/Apis/FoodApi";
+import { useSelector } from "react-redux";
 
 const Dishes = () => {
-  const { data } = useGetFoodItemsQuery();
+  const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const { data } = useGetFoodItemsQuery({hotelId});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
   // const [addons, setAddons] = useState([]);

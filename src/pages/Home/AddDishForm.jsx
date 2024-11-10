@@ -22,11 +22,13 @@ const AddDishForm = () => {
   const [addonsEnabled, setAddonsEnabled] = useState(true); // If the item can have addons
   const [isAddonItem, setIsAddonItem] = useState(false); // State to check if the item is an addon
   const [selectedAddons, setSelectedAddons] = useState([]); // Selected addons (multiple options)
-  const { data: foodItems } = useGetFoodItemsQuery();
+  const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const { data: foodItems } = useGetFoodItemsQuery({ hotelId });
+  console.log(hotelId)
+  console.log("checking fooditems", foodItems);
   const dishdata = useSelector((RootState) => RootState.PostDishdata);
   const [errors, setErrors] = useState({});
   const storage = getStorage(app);
-  const restaurant_id = useSelector((state) => state.auth.restaurant_id);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarType, setSnackbarType] = useState("success");
   const fileInputRef = useRef(null);
@@ -214,7 +216,7 @@ const AddDishForm = () => {
         const updatedDishData = {
           item_name: dishdata.item_name,
           description: dishdata.description,
-          hotel_id: dishdata.hotel_id,
+          hotel_id: hotelId,
           price: dishdata.price,
           addons: dishdata.addons,
           photo: imageUrl, // Assign photo if it exists in dishdata
@@ -240,14 +242,20 @@ const AddDishForm = () => {
         }
 
         const categoryData = isAddonItem ? ["Others"] : selectedCategories;
-
         const updatedDishData = {
-          ...dishdata,
-          photo: imageUrl, // Add image URL to register data
-          hotel_id: restaurant_id,
-          category: categoryData,
+          item_name: dishdata.item_name,
+          description: dishdata.description,
+          hotel_id: hotelId,
+          price: dishdata.price,
+          addons: dishdata.addons,
+          photo: imageUrl, // Assign photo if it exists in dishdata
+          is_veg: dishdata.is_veg,
+          is_addon: dishdata.is_addon,
+          is_active: dishdata.is_active,
+          category: categoryData, // Use the provided categoryData
         };
-        console.log(restaurant_id);
+
+        console.log(hotelId);
         console.log("dish data");
         console.log(updatedDishData);
         // Uncomment the following to actually post the dish

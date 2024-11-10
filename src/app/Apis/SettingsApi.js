@@ -16,14 +16,25 @@ export const SettingsApi = createApi({
       invalidatesTags: [{ type: "BankDetails" }],
     }),
     getBankDetails: builder.query({
-      query: (bankId) => ({
-        url: `v1/bankaccountdetails/${bankId}`,
+      query: (hotelId) => ({
+        url: `v1/bankaccountdetails/relatedid/${hotelId}`,
         method: "GET",
       }),
       providesTags: [{ type: "BankDetails" }],
     }),
+    updateBankDetails: builder.mutation({
+      query: ({ bankId, data }) => ({
+        url: `v1/bankaccountdetails/${bankId}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: [{ type: "BankDetails" }],
+    }),
   }),
 });
 
-
-export const { usePostBankDetailsMutation, useGetBankDetailsQuery } = SettingsApi
+export const {
+  usePostBankDetailsMutation,
+  useGetBankDetailsQuery,
+  useUpdateBankDetailsMutation,
+} = SettingsApi;

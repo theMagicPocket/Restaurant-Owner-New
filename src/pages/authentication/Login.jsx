@@ -8,6 +8,7 @@ import {
   setIsverified,
   setLoading,
   setRestaurantId,
+  setVouchers,
 } from "../../app/slices/authentication/authSlice";
 import {
   getAuth,
@@ -31,7 +32,9 @@ const Login = () => {
   const [snackbarType, setSnackbarType] = useState("success");
   const googleProvider = new GoogleAuthProvider();
   const userId = useSelector((state) => state.auth.user_id);
-  const { data: hotelData, error } = useGetByOwnerQuery(userId);
+  const { data: hotelData, error } = useGetByOwnerQuery(userId, {
+    skip: !userId,
+  });
   // const restaurant_id = null;
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -56,6 +59,9 @@ const Login = () => {
         dispatch(setIsRegistered(is_registered));
         dispatch(setRestaurantId(restaurant_id));
         dispatch(setIsverified(is_verified));
+        console.log("vouchers check");
+        console.log(hotelData.data[0].vouchers)
+        dispatch(setVouchers(hotelData.data[0].vouchers))
         navigate("/");
       } else if (hotelData && hotelData.length === 0) {
         const restaurant_id = "";

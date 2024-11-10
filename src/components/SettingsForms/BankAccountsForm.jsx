@@ -3,12 +3,21 @@ import PropTypes from "prop-types";
 import {
   usePostBankDetailsMutation,
   useGetBankDetailsQuery,
+  useUpdateBankDetailsMutation,
 } from "../../app/Apis/SettingsApi";
+import { useSelector } from "react-redux";
+import Snackbar from "../../components/Snackbar";
 
 const BankAccountsForm = () => {
+  const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("success");
   const [postBankData, { isLoading: isPosting }] = usePostBankDetailsMutation();
+  const [updateBankData, { isLoading: isUpdating }] =
+    useUpdateBankDetailsMutation();
   const { data: existingBankData, isLoading: isFetching } =
-    useGetBankDetailsQuery("672d58b755026e8b9447deed");
+    useGetBankDetailsQuery(hotelId);
+
   const [bankData, setBankData] = useState({
     accountNo: "",
     ifscCode: "",
@@ -27,7 +36,6 @@ const BankAccountsForm = () => {
     }
   }, [existingBankData]);
 
-
   const handleChange = (e) => {
     setBankData({ ...bankData, [e.target.name]: e.target.value });
   };
@@ -39,20 +47,41 @@ const BankAccountsForm = () => {
       account_name: bankData.accountHolderName,
       upi_id: bankData.upiId,
       ifsc_code: bankData.ifscCode,
-      related_id: "test_related_id", // Replace with the appropriate ID
     };
 
     try {
-      const response = await postBankData(formattedData).unwrap();
-      console.log("Response:", response);
-      console.log("Bank Account Details Submitted:", formattedData);
+      if (existingBankData && existingBankData.data) {
+        // PATCH request to update bank details
+        await updateBankData({
+          bankId: existingBankData.data.id,
+          data: formattedData,
+        }).unwrap();
+        console.log("Bank Account Details Updated:", formattedData);
+        setSnackbarMessage(
+          "Bank Account Details Updated Successfully."
+        );
+        setSnackbarType("success");
+      } else {
+        // POST request to create new bank details
+        await postBankData({ ...formattedData, related_id: hotelId }).unwrap();
+        console.log("Bank Account Details Submitted:", formattedData);
+        setSnackbarMessage("Bank Account Details Submitted Successfully.");
+        setSnackbarType("success");
+      }
     } catch (error) {
-      console.error("Failed to submit bank details:", error);
+        setSnackbarMessage("Something went wrong, Please try again");
+        setSnackbarType("error");
+        console.error("Failed to submit bank details:", error);
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <Snackbar
+        message={snackbarMessage}
+        type={snackbarType}
+        onClose={() => setSnackbarMessage("")} // Clear message on close
+      />
       <h2 className="text-2xl font-semibold mb-4">Bank Accounts</h2>
       {isFetching ? (
         <p>Loading bank details...</p>
@@ -115,10 +144,10 @@ const BankAccountsForm = () => {
       <div className="mt-6 flex justify-end">
         <button
           type="submit"
-          className={`bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition ${isPosting ? "opacity-50 cursor-not-allowed" : ""}`}
-          disabled={isPosting}
+          className={`bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 transition ${isPosting || isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
+          disabled={isPosting || isUpdating}
         >
-          {isPosting
+          {isPosting || isUpdating
             ? "Saving..."
             : existingBankData
               ? "Update Bank Details"

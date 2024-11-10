@@ -18,13 +18,13 @@ import HelpCenter from "./pages/Home/Help";
 import AddDishForm from "./pages/Home/AddDishForm";
 import { useEffect } from "react";
 // import axiosInstance from "./axiosInstance";
-import { setIsRegistered } from "./app/slices/authentication/authSlice";
+import { setIsRegistered, setVouchers } from "./app/slices/authentication/authSlice";
 import { setIsverified } from "./app/slices/authentication/authSlice";
 import { setRestaurantId } from "./app/slices/authentication/authSlice";
 import Forgot from "./pages/authentication/Forgot";
 import { useGetByOwnerQuery } from "./app/Apis/RegisterApi";
 import Vouchers from "./pages/Home/Vouchers";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
+import {  getAuth } from "firebase/auth";
 import app from "./firebase";
 import { login } from "./app/slices/authentication/authSlice";
 // import axiosInstance from "./axiosInstance";
@@ -49,25 +49,42 @@ function App() {
   console.log("outside");
   console.log(hotelData);
 
-    const auth = getAuth(app);
+  const auth = getAuth(app);
 
-    useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          // Refresh the token whenever the user state changes
-          const token = await user.getIdToken(true); // true forces a refresh of the token
-          const userEmail = user.email;
-          const userId = user.uid;
+    // useEffect(() => {
+    //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    //     if (user) {
+    //       // Refresh the token whenever the user state changes
+    //       const token = await user.getIdToken(true); // true forces a refresh of the token
+    //       const userEmail = user.email;
+    //       const userId = user.uid;
 
-          dispatch(login({ token, userEmail, userId }));
-        }
-      });
+    //       dispatch(login({ token, userEmail, userId }));
+    //     }
+    //   });
 
-      return () => unsubscribe();
-    }, [auth, dispatch]);
+    //   return () => unsubscribe();
+  // }, [auth, dispatch]);
+  
+  // useEffect(() => {
+    
+    
+  // }, []);
 
 
   useEffect(() => {
+    auth.onIdTokenChanged(async (user) => {
+      console.log("vamsi");
+      if (user) {
+        console.log(user);
+        const token = await user.getIdToken(true); // true forces a refresh of the token
+        console.log('new token', token);
+        const userEmail = user.email;
+        const userId = user.uid;
+
+        dispatch(login({ token, userEmail, userId }));
+      }
+    });
     console.log("Token:", token);
     console.log("User ID:", userId);
     console.log("Is Verified:", isVerified);
@@ -85,6 +102,7 @@ function App() {
         dispatch(setIsRegistered(is_registered));
         dispatch(setRestaurantId(restaurant_id));
         dispatch(setIsverified(is_verified));
+        dispatch(setVouchers(hotelData.data[0].vouchers))
       } else {
         console.log("cameeeeeeeeeeeeeeee");
         const restaurant_id = "";

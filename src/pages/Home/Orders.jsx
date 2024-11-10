@@ -23,7 +23,7 @@ const Orders = () => {
   });
   const filteredOrders = ordersData?.data;
   const { data: foodItemsData, isLoading: isFoodItemsLoading } =
-    useGetFoodItemsQuery();
+    useGetFoodItemsQuery({hotelId});
    const [selectedOrder, setSelectedOrder] = useState(null);
 
   // useEffect to set the initial selected order

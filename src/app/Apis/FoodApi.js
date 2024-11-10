@@ -9,16 +9,23 @@ export const FoodApi = createApi({
   baseQuery: axiosBaseQuery({ baseURL: BASE_URL }),
   endpoints: (builder) => ({
     getFoodItems: builder.query({
-      query: () => ({
-        url: "v1/fooditems/",
-      }),
+      query: ({ hotelId }) => {
+        const params = {
+          hotel_id: hotelId,
+        };
+        return {
+          url: "v1/fooditems/",
+          params,
+        };
+      },
+
       providesTags: ["FoodItem"],
+
       keepUnusedDataFor: 0,
       refetchOnFocus: true,
       refetchOnReconnect: true,
       refetchOnMountOrArgChange: true,
     }),
-
     getFoodItemById: builder.query({
       query: (id) => ({
         url: `v1/fooditems/${id}`,
@@ -86,10 +93,13 @@ export const FoodApi = createApi({
       }),
     }),
     getAllVouchers: builder.query({
-      query: () => ({
-        url: "v1/vouchers/",
-        method: "GET",
-      }),
+      query: (ids) => {
+        const idsParam = ids.join(",");
+        return {
+          url: `v1/vouchers/ids/${idsParam}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Voucher"],
       keepUnusedDataFor: 0,
     }),

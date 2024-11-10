@@ -5,7 +5,7 @@ import Snackbar from "../../components/Snackbar";
 import { TailSpin } from "react-loader-spinner";
 import { useUpdateVoucherMutation } from "../../app/Apis/FoodApi";
 
-const AddVoucher = ({ refetch, onClose, voucher}) => {
+const AddVoucher = ({ refetch, onClose, voucher, refetchHotelData }) => {
   const [formData, setFormData] = useState({
     voucher_code: "",
     voucher_name: "",
@@ -40,7 +40,7 @@ const AddVoucher = ({ refetch, onClose, voucher}) => {
         usage_limit: voucher.usage_limit,
         description: voucher.description,
         type: "HOTEL", // Assuming this is always the case
-        id: restaurant_id
+        id: restaurant_id,
       });
     }
   }, [voucher]);
@@ -101,8 +101,10 @@ const AddVoucher = ({ refetch, onClose, voucher}) => {
       console.log(dataToSend);
       if (voucher) console.log(voucher.id);
       if (voucher) {
-        
-        await updateVoucher({ voucherId: voucher.id, data: dataToSend }).unwrap();
+        await updateVoucher({
+          voucherId: voucher.id,
+          data: dataToSend,
+        }).unwrap();
         setSnackbarMessage("Voucher updated successfully!");
       } else {
         await postVoucher(dataToSend).unwrap();
@@ -119,7 +121,8 @@ const AddVoucher = ({ refetch, onClose, voucher}) => {
         per_user_usage_limit: "",
         usage_limit: "",
         description: "",
-      });
+      }); 
+      refetchHotelData();
       refetch();
       // onClose();
     } catch (error) {
