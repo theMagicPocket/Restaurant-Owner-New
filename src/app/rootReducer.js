@@ -7,11 +7,13 @@ import PostDishdata from "./slices/restaurant/Postdish";
 import { RegisterRestaurantApi } from "./Apis/RegisterApi";
 import RegisterRestaurantReducer from "./slices/restaurant/registerSlice";
 import { SettingsApi } from "./Apis/SettingsApi";
+import { HelpApi } from "./Apis/HelpAPi";
 
 export const middlewares = [
   FoodApi.middleware,
   RegisterRestaurantApi.middleware,
-  SettingsApi.middleware
+  SettingsApi.middleware,
+  HelpApi.middleware
 ];
 
 export const rootReducer = combineReducers({
@@ -22,6 +24,7 @@ export const rootReducer = combineReducers({
 
   Foodcategory: Foodcategory.reducer, // ---> Food categorey slice
   [FoodApi.reducerPath]: FoodApi.reducer,
-  [SettingsApi.reducerPath] : SettingsApi.reducer,
+  [SettingsApi.reducerPath]: SettingsApi.reducer,
+  [HelpApi.reducerPath]: HelpApi.reducer,
   PostDishdata: PostDishdata,
 });

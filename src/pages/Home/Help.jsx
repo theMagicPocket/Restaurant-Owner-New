@@ -2,14 +2,64 @@ import { useState } from "react";
 import Sidenavbar from "../../components/Sidenavbar"; // Sidebar from dishes component
 import { FaBars, FaTimes } from "react-icons/fa";
 import helpImage from "../../assets/help.jpg";
+import { useSelector } from "react-redux";
+import { usePostHelpMutation } from "../../app/Apis/HelpAPi";
+import Snackbar from "../../components/Snackbar";
 
 const HelpCenter = () => {
+  const email = useSelector((state) => state.auth.user_email);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [severity, setSeverity] = useState(""); // Track severity
+  const [message, setMessage] = useState(""); // Track message
+  const hotelId = useSelector((state) => state.auth.restaurant_id); // Track selected hotel ID (set default or select option)
+  const [postHelp, { isLoading }] = usePostHelpMutation(); // API hook
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("success");
 
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!severity || !message) {
+      setSnackbarMessage("Please fill all fields.");
+      setSnackbarType("error");
+      return;
+    }
+
+    // Prepare API body
+    const helpData = {
+      hotel_id: hotelId,
+      email: email,
+      query: message,
+      status: "PENDING", // Status is always "PENDING" when posting
+      severity: severity,
+    };
+
+    try {
+      // Call the API
+      await postHelp(helpData).unwrap();
+      setSnackbarMessage(
+        "Your help request has been submitted successfully! Please give us some time, and we'll get back to you."
+      );
+      setSnackbarType("success");
+      // Optionally, reset form here if needed
+      setMessage("");
+      setSeverity("");
+    } catch (error) {
+      setSnackbarMessage("Failed to submit help request. Please try again.");
+      setSnackbarType("error");
+      console.error("Error submitting help request:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+      <Snackbar
+        message={snackbarMessage}
+        type={snackbarType}
+        onClose={() => setSnackbarMessage("")} // Clear message on close
+      />
       {/* Hamburger menu for smaller screens */}
       <button
         onClick={handleToggleSidebar}
@@ -43,33 +93,8 @@ const HelpCenter = () => {
             <h2 className="text-2xl font-semibold mb-4">
               How can we help you?
             </h2>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-4">
-                {/* Select Category */}
-                <div className="form-group">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    How can we help you?
-                  </label>
-                  <select className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Choose an option</option>
-                    <option>General Inquiry</option>
-                    <option>Report an Issue</option>
-                    <option>Feedback</option>
-                  </select>
-                </div>
-
-                {/* Full Name */}
-                <div className="form-group">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Your full name"
-                  />
-                </div>
-
                 {/* Email Address */}
                 <div className="form-group">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -77,21 +102,30 @@ const HelpCenter = () => {
                   </label>
                   <input
                     type="email"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={email}
+                    readOnly
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none bg-gray-50 text-gray-500 font-semibold"
                     placeholder="Your email address"
                   />
                 </div>
 
-                {/* Mobile Number */}
+                {/* Severity */}
                 <div className="form-group">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mobile Number (optional)
+                    Urgency
                   </label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Your mobile number"
-                  />
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 font-semibold text-gray-600"
+                    value={severity}
+                    onChange={(e) => setSeverity(e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Please select urgency level
+                    </option>
+                    <option value="LOW">Low</option>
+                    <option value="MID">Medium</option>
+                    <option value="HIGH">High</option>
+                  </select>
                 </div>
 
                 {/* Message */}
@@ -102,6 +136,8 @@ const HelpCenter = () => {
                   <textarea
                     className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="4"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="Describe your issue or feedback"
                   ></textarea>
                 </div>
@@ -111,8 +147,9 @@ const HelpCenter = () => {
                   <button
                     type="submit"
                     className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600 transition"
+                    disabled={isLoading}
                   >
-                    Submit feedback
+                    {isLoading ? "Submitting..." : "Submit"}
                   </button>
                 </div>
               </div>
