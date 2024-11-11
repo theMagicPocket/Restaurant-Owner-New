@@ -1,93 +1,116 @@
-const DataTable = () => (
-  <div className="overflow-x-auto">
-    <table className="min-w-full bg-white border rounded-lg shadow-md">
-      <thead>
-        <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-          <th className="py-3 px-6 text-left">Customer</th>
-          <th className="py-3 px-6 text-left">Menu</th>
-          <th className="py-3 px-6 text-left">Total Payment</th>
-          <th className="py-3 px-6 text-left">Status</th>
-        </tr>
-      </thead>
-      <tbody className="text-gray-700 text-sm">
-        {/* Row 1 */}
-        <tr className="border-b hover:bg-gray-100">
-          <td className="py-3 px-6 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img
-                  src="https://img.daisyui.com/images/profile/demo/2@94.webp"
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="font-semibold">Hart Hagerty</span>
-            </div>
-          </td>
-          <td className="py-3 px-6 text-left">Zemlak, Daniel and Leannon</td>
-          <td className="py-3 px-6 text-left">Rs. 1500</td>
-          <td className="py-3 px-6 text-left">Pending</td>
-        </tr>
+import { useSelector } from "react-redux";
+import { useGetFoodItemsQuery } from "../app/Apis/FoodApi";
+const DataTable = ({ orders }) => {
+  console.log("dashboard orders check", orders);
+  const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const { data: foodItems } = useGetFoodItemsQuery({ hotelId });
+  console.log(foodItems);
 
-        {/* Row 2 */}
-        <tr className="border-b hover:bg-gray-100">
-          <td className="py-3 px-6 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img
-                  src="https://img.daisyui.com/images/profile/demo/3@94.webp"
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="font-semibold">Brice Swyre</span>
-            </div>
-          </td>
-          <td className="py-3 px-6 text-left">Carroll Group</td>
-          <td className="py-3 px-6 text-left">Rs. 3200</td>
-          <td className="py-3 px-6 text-left">Completed</td>
-        </tr>
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white border rounded-lg shadow-md">
+        <thead>
+          <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+            <th className="py-3 px-6 text-left">Order ID</th>
+            <th className="py-3 px-6 text-left">Total Price</th>
+            <th className="py-3 px-6 text-left">Details</th>
+          </tr>
+        </thead>
+        <tbody className="text-gray-700 text-sm">
+          {orders.length > 0 ? (
+            orders.map((order, index) => (
+              <tr key={index} className="border-b hover:bg-gray-100">
+                <td className="py-3 px-6 text-left font-semibold">
+                  {order.order_id}
+                </td>
+                <td className="py-3 px-6 text-left">
+                  {order.order_total_price}
+                </td>
+                <td className="py-3 px-6 text-left">
+                  {order.order_items && order.order_items.length > 0 ? (
+                    <div className="space-y-2">
+                      {order.order_items.map((item, itemIndex) => {
+                        const foodItem = foodItems?.data.filter((Fitem) => {
+                          return Fitem.id === item.fooditem_id;
+                        });
+                        const addonNames = item.addons
+                          ? item.addons.map((addonId) => {
+                              const addonItem = foodItems?.data.find(
+                                (Fitem) => Fitem.id === addonId
+                              );
+                              return addonItem ? addonItem.item_name : null;
+                            })
+                          : [];
 
-        {/* Row 3 */}
-        <tr className="border-b hover:bg-gray-100">
-          <td className="py-3 px-6 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img
-                  src="https://img.daisyui.com/images/profile/demo/4@94.webp"
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="font-semibold">Marjy Ferencz</span>
-            </div>
-          </td>
-          <td className="py-3 px-6 text-left">Rowe-Schoen</td>
-          <td className="py-3 px-6 text-left">Rs. 2500</td>
-          <td className="py-3 px-6 text-left">Preparing</td>
-        </tr>
+                        console.log("fooditem check", foodItem);
 
-        {/* Row 4 */}
-        <tr className="border-b hover:bg-gray-100">
-          <td className="py-3 px-6 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img
-                  src="https://img.daisyui.com/images/profile/demo/5@94.webp"
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="font-semibold">Yancy Tear</span>
-            </div>
-          </td>
-          <td className="py-3 px-6 text-left">Wyman-Ledner</td>
-          <td className="py-3 px-6 text-left">Rs. 5000</td>
-          <td className="py-3 px-6 text-left">Completed</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-);
+                        return (
+                          // <span key={itemIndex} className="block">
+                          //   Item {itemIndex+1}: {foodItem ? foodItem[0].item_name : null},
+                          //   Quantity: {item.quantity}, Price: {item.price},
+                          //   Addons:{" "}
+
+                          //   {addonNames.length > 0
+                          //     ? addonNames.join(", ")
+                          //     : "None"}
+                          // </span>
+                          <span key={itemIndex} className="block">
+                            <span style={{ fontWeight: "bold" }}>
+                              Item {itemIndex + 1}:
+                            </span>{" "}
+                            {foodItem ? foodItem[0].item_name : null},{" "}
+                            <span style={{ fontWeight: "bold" }}>
+                              Quantity:
+                            </span>{" "}
+                            {item.quantity},{" "}
+                            <span style={{ fontWeight: "bold" }}>Price:</span>{" "}
+                            {item.price},{" "}
+                            <span style={{ fontWeight: "bold" }}>Addons:</span>{" "}
+                            {addonNames.length > 0
+                              ? addonNames.join(", ")
+                              : "None"}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    "No items found"
+                  )}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3" className="py-3 px-6 text-center">
+                No orders found
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 export default DataTable;
+
+{
+  /* Addons:{" "}
+                          {item.addons && item.addons.length > 0
+                            ? item.addons.join(", ")
+                            : "None"} */
+}
+{
+  /* <p>
+                            <strong>Addons:</strong>{" "}
+                            {item.addons && item.addons.length > 0 ? (
+                              <ul className="list-disc list-inside">
+                                {item.addons.map((addon, addonIndex) => (
+                                  <li key={addonIndex}>{addon}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              "None"
+                            )}
+                          </p> */
+}

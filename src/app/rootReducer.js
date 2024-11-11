@@ -8,12 +8,14 @@ import { RegisterRestaurantApi } from "./Apis/RegisterApi";
 import RegisterRestaurantReducer from "./slices/restaurant/registerSlice";
 import { SettingsApi } from "./Apis/SettingsApi";
 import { HelpApi } from "./Apis/HelpAPi";
+import { DashboardApi } from "./Apis/DashboardApi";
 
 export const middlewares = [
   FoodApi.middleware,
   RegisterRestaurantApi.middleware,
   SettingsApi.middleware,
-  HelpApi.middleware
+  HelpApi.middleware,
+  DashboardApi.middleware,
 ];
 
 export const rootReducer = combineReducers({
@@ -26,5 +28,6 @@ export const rootReducer = combineReducers({
   [FoodApi.reducerPath]: FoodApi.reducer,
   [SettingsApi.reducerPath]: SettingsApi.reducer,
   [HelpApi.reducerPath]: HelpApi.reducer,
+  [DashboardApi.reducerPath]: DashboardApi.reducer,
   PostDishdata: PostDishdata,
 });

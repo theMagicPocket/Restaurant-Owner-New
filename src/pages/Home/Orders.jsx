@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import Sidenavbar from "../../components/Sidenavbar";
 import { FaTimes, FaBars } from "react-icons/fa";
@@ -18,20 +17,20 @@ const Orders = () => {
     isLoading: isOrdersLoading,
     error,
   } = useGetOrdersQuery({
-    orderStatus: selectedStatus,
+    orderStatus: selectedStatus || "PLACED",
     hotelId: hotelId, // Replace with dynamic hotel ID as needed
   });
   const filteredOrders = ordersData?.data;
   const { data: foodItemsData, isLoading: isFoodItemsLoading } =
-    useGetFoodItemsQuery({hotelId});
-   const [selectedOrder, setSelectedOrder] = useState(null);
+    useGetFoodItemsQuery({ hotelId });
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // useEffect to set the initial selected order
   useEffect(() => {
     if (filteredOrders && filteredOrders.length > 0) {
       setSelectedOrder(filteredOrders[0]); // Set the first order as selected
     }
-  }, [filteredOrders]); 
+  }, [filteredOrders]);
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -77,7 +76,6 @@ const Orders = () => {
   if (isOrdersLoading || isFoodItemsLoading) return <p>Loading orders...</p>;
   if (error) return <p>Failed to load orders</p>;
 
-  
   console.log(ordersData);
 
   return (
@@ -101,19 +99,21 @@ const Orders = () => {
         {/* Left side: Orders list */}
         <div className="w-full md:w-5/12 py-4 px-2 bg-gray-100 flex-grow overflow-y-auto">
           <div className="flex flex-row items-center mb-4 md:hidden">
-            {["PLACED", "ACCEPTED", "READY", "PICKED_UP"].map((status) => (
-              <button
-                key={status}
-                onClick={() => filterOrders(status)}
-                className={`${
-                  selectedStatus === status
-                    ? "bg-blue-900 text-white mr-2"
-                    : "bg-gray-200 text-gray-700 mr-2"
-                } py-2 px-1 rounded-lg text-sm mb-2 md:mb-0`}
-              >
-                {status}
-              </button>
-            ))}
+            {["PLACED", "ACCEPTED", "READY", "PICKED_UP"].map(
+              (status, index) => (
+                <button
+                  key={index}
+                  onClick={() => filterOrders(status)}
+                  className={`${
+                    selectedStatus === status
+                      ? "bg-blue-900 text-white mr-2"
+                      : "bg-gray-200 text-gray-700 mr-2"
+                  } py-2 px-1 rounded-lg text-sm mb-2 md:mb-0`}
+                >
+                  {status}
+                </button>
+              )
+            )}
           </div>
           <input
             type="text"
@@ -121,13 +121,11 @@ const Orders = () => {
             className="w-full p-3 border rounded-lg mb-2 h-10"
           />
           <div className="space-y-4">
-            {filteredOrders.map((order) => (
+            {filteredOrders.map((order, index) => (
               <div
-                key={order.id}
+                key={index}
                 className={`p-4 border rounded-lg bg-white shadow-sm cursor-pointer ${
-                  selectedOrder?.order_id === order.order_id
-                    ? "bg-gray-300"
-                    : ""
+                  selectedOrder?.order_id === order.order_id ? "bg-blue-600" : ""
                 }`} // Apply background color if the order is selected
                 onClick={() => handleOrderClick(order)}
               >
@@ -152,19 +150,21 @@ const Orders = () => {
         {/* Right side: Order details */}
         <div className="hidden md:block w-full md:w-2/3 py-4 bg-gray-100 h-screen flex flex-col">
           <div className="hidden md:flex flex-row mb-2">
-            {["PLACED", "ACCEPTED", "READY", "PICKED_UP"].map((status) => (
-              <button
-                key={status}
-                onClick={() => filterOrders(status)}
-                className={`${
-                  selectedStatus === status
-                    ? "bg-blue-900 text-white mr-2"
-                    : "bg-gray-200 text-gray-700 mr-2"
-                } py-2 px-4 rounded-lg text-sm`}
-              >
-                {status}
-              </button>
-            ))}
+            {["PLACED", "ACCEPTED", "READY", "PICKED_UP"].map(
+              (status, index) => (
+                <button
+                  key={index}
+                  onClick={() => filterOrders(status)}
+                  className={`${
+                    selectedStatus === status
+                      ? "bg-blue-900 text-white mr-2"
+                      : "bg-gray-200 text-gray-700 mr-2"
+                  } py-2 px-4 rounded-lg text-sm`}
+                >
+                  {status}
+                </button>
+              )
+            )}
           </div>
           <div className="flex-grow h-full flex flex-col">
             {selectedOrder ? (
@@ -212,5 +212,3 @@ const Orders = () => {
 };
 
 export default Orders;
-
-

@@ -2,21 +2,31 @@ import { FiPrinter } from "react-icons/fi";
 import { useUpdateOrderMutation } from "../app/Apis/FoodApi";
 import { useGetOrdersQuery } from "../app/Apis/FoodApi";
 import { useSelector } from "react-redux";
-import PropTypes from "prop-types"; 
+import PropTypes from "prop-types";
 import Snackbar from "./Snackbar";
 import { useState } from "react";
 
-const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders, setSelectedOrder }) => {
+const OrderCard = ({
+  order,
+  getFoodItemDetails,
+  getAddonDetails,
+  filteredOrders,
+  setSelectedOrder,
+}) => {
   const hotelId = useSelector((state) => state.auth.restaurant_id);
   const [updateOrder] = useUpdateOrderMutation();
-  const { refetch: refetchOrders } = useGetOrdersQuery();
+  // const { refetch: refetchOrders } = useGetOrdersQuery();
+  const { refetch: refetchOrders } = useGetOrdersQuery({
+    orderStatus: order ? order.order_status : "PLACED",
+    hotelId: hotelId,
+  });
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarType, setSnackbarType] = useState("success"); 
-   
+  const [snackbarType, setSnackbarType] = useState("success");
+
   if (!order) {
     return <p className="text-gray-600">Select an order to see details</p>;
   }
-  console.log(order)
+  console.log(order);
 
   const getNextStatus = (currentStatus) => {
     switch (currentStatus) {
@@ -57,21 +67,17 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
         );
 
         // Select the next order if available
-        const nextOrder =
-          filteredOrders[currentOrderIndex + 1] || null; // Move to the next order, or loop back to the first one if it's the last order
+        const nextOrder = filteredOrders[currentOrderIndex + 1] || null; // Move to the next order, or loop back to the first one if it's the last order
         setSelectedOrder(nextOrder);
-         setSnackbarMessage(
-           "Order updated successfully"
-         );
-         setSnackbarType("success");
-
+        setSnackbarMessage("Order updated successfully");
+        setSnackbarType("success");
       } catch (error) {
         setSnackbarMessage("Something Went Wrong, Please try again.");
         setSnackbarType("error");
         console.error("Failed to update order status", error);
       }
     }
-  }; 
+  };
 
   return (
     <div className="flex flex-col h-full p-4 border rounded-lg bg-white mb-4">
@@ -98,7 +104,6 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
           {order.order_items.map((item) => {
             const foodItem = getFoodItemDetails(item.fooditem_id);
             const addons = getAddonDetails(item.addons);
-      
 
             return (
               <div key={item.fooditem_id} className="border-b py-2">
@@ -117,7 +122,6 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
                   <div className="mt-1">
                     <p className="text-gray-500 text-sm">Add-ons:</p>
                     {addons.map((addon) => (
-                      
                       <div
                         key={addon.id}
                         className="flex justify-between text-gray-700"
@@ -177,27 +181,26 @@ const OrderCard = ({ order, getFoodItemDetails, getAddonDetails, filteredOrders,
   );
 };
 
-
 OrderCard.propTypes = {
   order: PropTypes.shape({
     order_id: PropTypes.string.isRequired,
     order_status: PropTypes.string.isRequired,
     created_at: PropTypes.string.isRequired,
     order_total_price: PropTypes.number.isRequired,
-    order_items: PropTypes.arrayOf(
-      PropTypes.shape({
-        fooditem_id: PropTypes.string.isRequired,
-        quantity: PropTypes.number.isRequired,
-        price: PropTypes.number.isRequired,
-        addons: PropTypes.arrayOf(
-          PropTypes.shape({
-            id: PropTypes.string.isRequired,
-            item_name: PropTypes.string.isRequired,
-            price: PropTypes.number.isRequired,
-          })
-        ).isRequired,
-      })
-    ).isRequired,
+    // order_items: PropTypes.arrayOf(
+    //   PropTypes.shape({
+    //     fooditem_id: PropTypes.string.isRequired,
+    //     quantity: PropTypes.number.isRequired,
+    //     price: PropTypes.number.isRequired,
+    //     addons: PropTypes.arrayOf(
+    //       PropTypes.shape({
+    //         id: PropTypes.string.isRequired,
+    //         item_name: PropTypes.string.isRequired,
+    //         price: PropTypes.number.isRequired,
+    //       })
+    //     ).isRequired,
+    //   })
+    // ).isRequired,
   }).isRequired,
   getFoodItemDetails: PropTypes.func.isRequired,
   getAddonDetails: PropTypes.func.isRequired,
@@ -212,13 +215,13 @@ OrderCard.propTypes = {
           fooditem_id: PropTypes.string.isRequired,
           quantity: PropTypes.number.isRequired,
           price: PropTypes.number.isRequired,
-          addons: PropTypes.arrayOf(
-            PropTypes.shape({
-              id: PropTypes.string.isRequired,
-              item_name: PropTypes.string.isRequired,
-              price: PropTypes.number.isRequired,
-            })
-          ).isRequired,
+          // addons: PropTypes.arrayOf(
+          //   PropTypes.shape({
+          //     id: PropTypes.string.isRequired,
+          //     item_name: PropTypes.string.isRequired,
+          //     price: PropTypes.number.isRequired,
+          //   })
+          // ).isRequired,
         })
       ).isRequired,
     })
