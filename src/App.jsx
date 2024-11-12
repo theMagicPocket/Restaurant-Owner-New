@@ -21,6 +21,7 @@ import { useEffect } from "react";
 import {
   setIsRegistered,
   setOpen,
+  setRestaurantSettings,
   setVouchers,
 } from "./app/slices/authentication/authSlice";
 import { setIsverified } from "./app/slices/authentication/authSlice";
@@ -78,24 +79,25 @@ function App() {
       console.log("useGetByOwnerQuery Api");
       console.log(hotelData);
       if (hotelData.data.length !== 0) {
-        const restaurant_id = hotelData.data[0].id;
-        const is_verified = hotelData.data[0].is_verified;
-        const is_registered = true;
-
-        dispatch(setIsRegistered(is_registered));
-        dispatch(setRestaurantId(restaurant_id));
-        dispatch(setIsverified(is_verified));
-        dispatch(setVouchers(hotelData.data[0].vouchers));
-        dispatch(setOpen(hotelData.data[0].is_open));
+        const restaurant = hotelData.data[0];
+        dispatch(setRestaurantId(restaurant.id));
+        dispatch(setIsverified(restaurant.is_verified));
+        dispatch(setIsRegistered(true));
+        dispatch(setVouchers(restaurant.vouchers));
+        dispatch(setOpen(restaurant.is_open));
+        dispatch(
+          setRestaurantSettings({
+            imageUrl: restaurant.photo,
+            opensAt: restaurant.opens_at,
+            closesAt: restaurant.closes_at,
+            restaurantName: restaurant.name
+          })
+        );
+        // dispatch(setRestaurantSettings(hotelData.data[0].))
       } else {
-        console.log("cameeeeeeeeeeeeeeee");
-        const restaurant_id = "";
-        const is_verified = false;
-        const is_registered = false;
-
-        dispatch(setIsRegistered(is_registered));
-        dispatch(setRestaurantId(restaurant_id));
-        dispatch(setIsverified(is_verified));
+        dispatch(setIsRegistered(false));
+        dispatch(setRestaurantId(""));
+        dispatch(setIsverified(false));
       }
     } else if (error) {
       console.error("Error fetching hotel verification status", error);
@@ -157,9 +159,9 @@ function App() {
               !token ? (
                 <Login />
               ) : (
-                  redirectToDashboard
-                  // || redirectToSuccess
-                  || redirectToRegister
+                redirectToDashboard ||
+                // || redirectToSuccess
+                redirectToRegister
               )
             }
           />
@@ -169,9 +171,9 @@ function App() {
               !token ? (
                 <Signup />
               ) : (
-                  redirectToDashboard
-                  // || redirectToSuccess
-                  || redirectToRegister
+                redirectToDashboard ||
+                // || redirectToSuccess
+                redirectToRegister
               )
             }
           />
@@ -182,9 +184,9 @@ function App() {
               !token ? (
                 <Forgot></Forgot>
               ) : (
-                  redirectToDashboard
-                  // || redirectToSuccess
-                  || redirectToRegister
+                redirectToDashboard ||
+                // || redirectToSuccess
+                redirectToRegister
               )
             }
           />
@@ -198,8 +200,8 @@ function App() {
               ) : !isRegistered ? (
                 <Registration />
               ) : (
-                    redirectToDashboard
-                    // || redirectToSuccess
+                redirectToDashboard
+                // || redirectToSuccess
               )
             }
           />

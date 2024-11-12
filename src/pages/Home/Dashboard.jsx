@@ -34,19 +34,6 @@ const Dashboard = () => {
   } = useGetOrdersQuery({ orderStatus: "PICKED_UP", hotelId });
 
   const [updateHotel] = useUpdateHotelMutation();
-
-  // const handleToggleRestaurant = () => {
-  //   const confirmToggle = window.confirm(
-  //     `Are you sure you want to ${isRestaurantOpen ? "close" : "open"} the restaurant?`
-  //   );
-  //   if (confirmToggle) {
-  //     // Toggle state locally
-  //     setIsRestaurantOpen((prev) => !prev);
-  //     // Dispatch the action to update restaurant status in the backend
-  //     // dispatch(updateRestaurantStatus({ hotelId, status: !isRestaurantOpen }));
-  //   }
-  // };
-
   const handleToggleRestaurant = async () => {
     if (!isVerified) {
       alert(
