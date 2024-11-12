@@ -26,10 +26,18 @@ export const RegisterRestaurantApi = createApi({
       }),
       providesTags: ["Hotel"],
     }),
+    updateHotel: builder.mutation({
+      query: ({ hotelId, data }) => ({
+        url: `v1/hotels/${hotelId}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["Hotel"],
+    }),
   }),
 });
 
 // Export the mutation hook for posting hotel data
 // export const { usePostHotelMutation } = RegisterRestaurantApi;
-export const { usePostHotelMutation, useGetByOwnerQuery } =
+export const { usePostHotelMutation, useGetByOwnerQuery, useUpdateHotelMutation } =
   RegisterRestaurantApi;

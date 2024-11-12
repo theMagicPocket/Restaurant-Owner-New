@@ -6,10 +6,15 @@ import { FaTimes, FaBars } from "react-icons/fa";
 import { useGetStatsQuery } from "../../app/Apis/DashboardApi";
 import { useGetOrdersQuery } from "../../app/Apis/FoodApi";
 import { useSelector } from "react-redux";
+import { useUpdateHotelMutation } from "../../app/Apis/RegisterApi";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [filter, setFilter] = useState("today"); // "today", "month", "all"
+  //  const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
+  const isRestaurantOpen = useSelector((state) => state.auth.is_open);
+  const isVerified = useSelector((state) => state.auth.is_verified);
+  
 
   // Example hotel ID
   const hotelId = useSelector((state) => state.auth.restaurant_id);
@@ -27,6 +32,49 @@ const Dashboard = () => {
     isLoading: isOrdersLoading,
     error: ordersError,
   } = useGetOrdersQuery({ orderStatus: "PICKED_UP", hotelId });
+
+  const [updateHotel] = useUpdateHotelMutation();
+
+  // const handleToggleRestaurant = () => {
+  //   const confirmToggle = window.confirm(
+  //     `Are you sure you want to ${isRestaurantOpen ? "close" : "open"} the restaurant?`
+  //   );
+  //   if (confirmToggle) {
+  //     // Toggle state locally
+  //     setIsRestaurantOpen((prev) => !prev);
+  //     // Dispatch the action to update restaurant status in the backend
+  //     // dispatch(updateRestaurantStatus({ hotelId, status: !isRestaurantOpen }));
+  //   }
+  // };
+
+  const handleToggleRestaurant = async () => {
+    if (!isVerified) {
+      alert(
+        "Your hotel is not verified yet. Please give us some time to verify it."
+      );
+      return;
+    }
+
+    const confirmToggle = window.confirm(
+      `Are you sure you want to ${isRestaurantOpen ? "close" : "open"} the restaurant?`
+    );
+    if (confirmToggle) {
+      try {
+        // Call the API to update the restaurant status
+        const response = await updateHotel({
+          hotelId,
+          data: { is_open: !isRestaurantOpen },
+        }).unwrap();
+
+        // Dispatch the action to update the state in Redux
+        // dispatch(updateRestaurantStatus(response.data.is_open));
+        console.log("update successfully", response);
+      } catch (error) {
+        console.error("Failed to update restaurant status:", error);
+      }
+    }
+  };
+
 
   // Function to filter orders based on the selected date range
   const filterOrders = (orders, filter) => {
@@ -94,6 +142,23 @@ const Dashboard = () => {
         }`}
       >
         <div className="flex flex-col gap-4 mb-6 mt-4">
+          <div className="flex items-center justify-center">
+            <label className="mr-2 text-gray-700 font-semibold">
+              {isRestaurantOpen ? "Restaurant Opened" : "Restaurant Closed"}
+            </label>
+            <button
+              onClick={handleToggleRestaurant}
+              className={`relative inline-flex items-center h-6 rounded-full w-12 transition-colors ${
+                isRestaurantOpen ? "bg-green-500" : "bg-red-500"
+              }`}
+            >
+              <span
+                className={`transform transition-transform w-5 h-5 bg-white rounded-full ${
+                  isRestaurantOpen ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
           <div className="text-2xl font-black">Dashboard</div>
 
           {/* Summary Cards */}

@@ -54,7 +54,7 @@ const DataTable = ({ orders }) => {
                               Quantity:
                             </span>{" "}
                             {item.quantity},{" "}
-                            <span style={{ fontWeight: "bold" }}>Price:</span>{" "}
+                            <span style={{ fontWeight: "bold" }}>Price:</span> ₹
                             {item.price},{" "}
                             <span style={{ fontWeight: "bold" }}>Addons:</span>{" "}
                             {addonNames.length > 0

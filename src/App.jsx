@@ -10,7 +10,7 @@ import Login from "./pages/authentication/Login";
 import Signup from "./pages/authentication/Signup";
 import Orders from "./pages/Home/Orders";
 import Dashboard from "./pages/Home/Dashboard";
-import RegistrationSuccess from "./pages/authentication/RegistrationSuccess";
+// import RegistrationSuccess from "./pages/authentication/RegistrationSuccess";
 import { useDispatch, useSelector } from "react-redux";
 import Registration from "./pages/authentication/Registration";
 import AccountSettings from "./pages/Home/AccountSettings";
@@ -18,13 +18,17 @@ import HelpCenter from "./pages/Home/Help";
 import AddDishForm from "./pages/Home/AddDishForm";
 import { useEffect } from "react";
 // import axiosInstance from "./axiosInstance";
-import { setIsRegistered, setVouchers } from "./app/slices/authentication/authSlice";
+import {
+  setIsRegistered,
+  setOpen,
+  setVouchers,
+} from "./app/slices/authentication/authSlice";
 import { setIsverified } from "./app/slices/authentication/authSlice";
 import { setRestaurantId } from "./app/slices/authentication/authSlice";
 import Forgot from "./pages/authentication/Forgot";
 import { useGetByOwnerQuery } from "./app/Apis/RegisterApi";
 import Vouchers from "./pages/Home/Vouchers";
-import {  getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import app from "./firebase";
 import { login } from "./app/slices/authentication/authSlice";
 // import axiosInstance from "./axiosInstance";
@@ -51,34 +55,13 @@ function App() {
 
   const auth = getAuth(app);
 
-    // useEffect(() => {
-    //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    //     if (user) {
-    //       // Refresh the token whenever the user state changes
-    //       const token = await user.getIdToken(true); // true forces a refresh of the token
-    //       const userEmail = user.email;
-    //       const userId = user.uid;
-
-    //       dispatch(login({ token, userEmail, userId }));
-    //     }
-    //   });
-
-    //   return () => unsubscribe();
-  // }, [auth, dispatch]);
-  
-  // useEffect(() => {
-    
-    
-  // }, []);
-
-
   useEffect(() => {
     auth.onIdTokenChanged(async (user) => {
       console.log("vamsi");
       if (user) {
         console.log(user);
         const token = await user.getIdToken(true); // true forces a refresh of the token
-        console.log('new token', token);
+        console.log("new token", token);
         const userEmail = user.email;
         const userId = user.uid;
 
@@ -102,7 +85,8 @@ function App() {
         dispatch(setIsRegistered(is_registered));
         dispatch(setRestaurantId(restaurant_id));
         dispatch(setIsverified(is_verified));
-        dispatch(setVouchers(hotelData.data[0].vouchers))
+        dispatch(setVouchers(hotelData.data[0].vouchers));
+        dispatch(setOpen(hotelData.data[0].is_open));
       } else {
         console.log("cameeeeeeeeeeeeeeee");
         const restaurant_id = "";
@@ -126,16 +110,16 @@ function App() {
 
   const redirectToRegister =
     token && !isRegistered ? <Navigate to="/register" /> : null;
-  const redirectToSuccess =
-    token && isRegistered && !isVerified ? <Navigate to="/success" /> : null;
+  // const redirectToSuccess =
+  //   token && isRegistered && !isVerified ? <Navigate to="/success" /> : null;
   const redirectToDashboard =
-    token && isVerified ? <Navigate to="/dashboard" /> : null;
+    token && isRegistered ? <Navigate to="/dashboard" /> : null;
 
   // Function to handle private route logic
   const handlePrivateRoute = (Component) => {
     if (!token) return <Navigate to="/login" />;
     if (!isRegistered) return <Navigate to="/register" />;
-    if (!isVerified) return <Navigate to="/success" />;
+    // if (!isVerified) return <Navigate to="/success" />;
     return <Component />;
   };
 
@@ -149,13 +133,13 @@ function App() {
             element={
               redirectToLogin ||
               redirectToRegister ||
-              redirectToSuccess ||
+              // redirectToSuccess ||
               redirectToDashboard
             }
           />
 
           {/* Success Route */}
-          <Route
+          {/* <Route
             path="/success"
             element={
               token && isRegistered && !isVerified ? (
@@ -164,7 +148,7 @@ function App() {
                 <Navigate to="/" />
               )
             }
-          />
+          /> */}
 
           {/* Authentication Routes */}
           <Route
@@ -173,7 +157,9 @@ function App() {
               !token ? (
                 <Login />
               ) : (
-                redirectToDashboard || redirectToSuccess || redirectToRegister
+                  redirectToDashboard
+                  // || redirectToSuccess
+                  || redirectToRegister
               )
             }
           />
@@ -183,7 +169,9 @@ function App() {
               !token ? (
                 <Signup />
               ) : (
-                redirectToDashboard || redirectToSuccess || redirectToRegister
+                  redirectToDashboard
+                  // || redirectToSuccess
+                  || redirectToRegister
               )
             }
           />
@@ -194,7 +182,9 @@ function App() {
               !token ? (
                 <Forgot></Forgot>
               ) : (
-                redirectToDashboard || redirectToSuccess || redirectToRegister
+                  redirectToDashboard
+                  // || redirectToSuccess
+                  || redirectToRegister
               )
             }
           />
@@ -208,7 +198,8 @@ function App() {
               ) : !isRegistered ? (
                 <Registration />
               ) : (
-                redirectToDashboard || redirectToSuccess
+                    redirectToDashboard
+                    // || redirectToSuccess
               )
             }
           />

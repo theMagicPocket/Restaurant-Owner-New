@@ -9,6 +9,7 @@ const initialState = {
   isLoading: false,
   is_registered: false,
   vouchers: null,
+  is_open: false,
 };
 
 export const authSlice = createSlice({
@@ -45,6 +46,9 @@ export const authSlice = createSlice({
     },
     setVouchers: (state, action) => {
       state.vouchers = action.payload
+    },
+    setOpen: (state, action) => {
+      state.is_open = action.payload
     }
   },
 });
@@ -57,7 +61,8 @@ export const {
   setRestaurantId,
   setIsRegistered,
   setIsverified,
-  setVouchers
+  setVouchers,
+  setOpen
 } = authSlice.actions;
 
 export default authSlice.reducer;

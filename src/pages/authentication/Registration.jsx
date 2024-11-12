@@ -136,7 +136,7 @@ const Registration = () => {
       dispatch(setRestaurantId(response.data.data)); // Dispatch Redux actions
       dispatch(setIsRegistered(true));
       dispatch(setIsverified(false)) 
-      navigate("/success");
+      navigate("/");
     } catch (error) {
       console.error("Error creating hotel:", error);
     } finally {
