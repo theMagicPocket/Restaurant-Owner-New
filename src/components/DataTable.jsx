@@ -45,15 +45,6 @@ const DataTable = ({ orders }) => {
                         console.log("fooditem check", foodItem);
 
                         return (
-                          // <span key={itemIndex} className="block">
-                          //   Item {itemIndex+1}: {foodItem ? foodItem[0].item_name : null},
-                          //   Quantity: {item.quantity}, Price: {item.price},
-                          //   Addons:{" "}
-
-                          //   {addonNames.length > 0
-                          //     ? addonNames.join(", ")
-                          //     : "None"}
-                          // </span>
                           <span key={itemIndex} className="block">
                             <span style={{ fontWeight: "bold" }}>
                               Item {itemIndex + 1}:
