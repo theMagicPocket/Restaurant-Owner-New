@@ -32,6 +32,7 @@ const Vouchers = () => {
   const [editingVoucher, setEditingVoucher] = useState(null);
   const [updateVoucher] = useUpdateVoucherMutation();
   const userId = useSelector((state) => state.auth.user_id);
+  const [searchTerm, setSearchTerm] = useState("");
   const { data: hotelData, refetch: refetchHotelData, isSuccess } = useGetByOwnerQuery(
     userId,
     { skip: !userId }
@@ -91,6 +92,16 @@ const Vouchers = () => {
     }
   };
 
+  const filteredVouchers = searchTerm
+    ? vouchers?.data.filter(
+        (voucher) =>
+          voucher.voucher_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          voucher.voucher_code.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : vouchers?.data;
+
   console.log(vouchers);
 
   return (
@@ -127,17 +138,29 @@ const Vouchers = () => {
             </button>
           </div>
 
+          {!isFormOpen && (
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search vouchers by voucher code or voucher name"
+                className="p-2 w-full border border-gray-300 rounded-md"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          )}
+
           {isFormOpen ? (
             <AddVoucher
               onClose={handleToggleForm}
               refetch={refetch}
-              refetchHotelData= {refetchHotelData}
+              refetchHotelData={refetchHotelData}
               voucher={editingVoucher}
             /> // Pass voucher as prop for editing
           ) : (
             // Display vouchers in a grid
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 relative">
-              {vouchers?.data.map((voucher) => (
+              {filteredVouchers?.map((voucher) => (
                 <div
                   key={voucher.id}
                   className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105 border border-gray-200 relative"
