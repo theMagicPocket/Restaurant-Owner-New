@@ -12,6 +12,7 @@ const Orders = () => {
   const [selectedStatus, setSelectedStatus] = useState("PLACED");
   const [isMobilePopupOpen, setIsMobilePopupOpen] = useState(false); // For mobile popup
   const hotelId = useSelector((state) => state.auth.restaurant_id);
+  const [searchQuery, setSearchQuery] = useState("");
   const {
     data: ordersData,
     isLoading: isOrdersLoading,
@@ -39,6 +40,7 @@ const Orders = () => {
   const filterOrders = (status) => {
     setSelectedStatus(status);
     setSelectedOrder(null); // Reset selected order when changing status
+    setSearchQuery("");
   };
 
   const handleOrderClick = (order) => {
@@ -71,6 +73,14 @@ const Orders = () => {
   const getAddonDetails = (addonIds) => {
     return addonIds.map((addonId) => foodItemsMap[addonId] || {});
   };
+
+  // Filter orders by search query
+  const filteredOrdersBySearch = useMemo(() => {
+    if (!searchQuery) return filteredOrders;
+    return filteredOrders.filter((order) =>
+      order.order_id.toString().includes(searchQuery)
+    );
+  }, [searchQuery, filteredOrders]);
 
   // Loading and error states
   if (isOrdersLoading || isFoodItemsLoading) return <p>Loading orders...</p>;
@@ -119,13 +129,17 @@ const Orders = () => {
             type="text"
             placeholder="Search"
             className="w-full p-3 border rounded-lg mb-2 h-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <div className="space-y-4">
-            {filteredOrders.map((order, index) => (
+            {filteredOrdersBySearch.map((order, index) => (
               <div
                 key={index}
                 className={`p-4 border rounded-lg bg-white shadow-sm cursor-pointer ${
-                  selectedOrder?.order_id === order.order_id ? "bg-blue-600" : ""
+                  selectedOrder?.order_id === order.order_id
+                    ? "bg-blue-600"
+                    : ""
                 }`} // Apply background color if the order is selected
                 onClick={() => handleOrderClick(order)}
               >
