@@ -1,4 +1,3 @@
-
 import { FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
 import Sidenavbar from "../../components/Sidenavbar";
@@ -12,9 +11,10 @@ import { useSelector } from "react-redux";
 
 const Dishes = () => {
   const hotelId = useSelector((state) => state.auth.restaurant_id);
-  const { data } = useGetFoodItemsQuery({hotelId});
+  const { data } = useGetFoodItemsQuery({ hotelId });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   // const [addons, setAddons] = useState([]);
 
   const categories = [
@@ -35,12 +35,13 @@ const Dishes = () => {
     "Soups",
     "Shakes",
     "AddOns",
-    "Others"
+    "Others",
   ];
 
   const handleToggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const handleCategoryClick = (index) => {
     setSelectedCategory(index);
+    setSearchTerm("");
   };
 
   const getAddons = (addonIds) => {
@@ -69,25 +70,31 @@ const Dishes = () => {
 
 
   const filteredFoodItems = data?.data.filter((item) => {
+    console.log("item", item);
+    // Apply category filter first
+    let isCategoryMatch = false;
     if (selectedCategory === 0) {
       // For "All" category, return all food items (exclude add-ons by default unless AddOns is selected)
-      return true;
+      isCategoryMatch = true;
     } else if (categories[selectedCategory] === "AddOns") {
       // For "AddOns" category, return only items that are add-ons
-      return item.is_addon === true;
-    }
-    else {
+      isCategoryMatch = item.is_addon === true;
+    } else {
       // For all other categories, return items in the selected category and exclude add-ons
-      return (
+      isCategoryMatch =
         item.category.includes(categories[selectedCategory]) &&
-        item.is_addon === false
-      );
+        item.is_addon === false;
     }
+
+    const isSearchMatch =
+      searchTerm === "" ||
+      (item.item_name &&
+        item.item_name.toLowerCase().includes(searchTerm.toLowerCase())); // Check if item.name is not undefined or null
+
+    // Return items if they match both category and search filter (or just category if search term is empty)
+    return isCategoryMatch && isSearchMatch;
   });
 
-  
- 
-  
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <button
@@ -127,8 +134,26 @@ const Dishes = () => {
 
         <div className="bg-gray-100 shadow-2xl rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="text-xl font-semibold">
-              Food Items in {categories[selectedCategory]}
+            <div className="flex flex-col md:flex-row items-center justify-between w-full">
+              <div className="text-xl font-semibold mb-4 md:mb-0">
+                Food Items in {categories[selectedCategory]}
+              </div>
+
+              <div className="flex items-center space-x-2 w-full md:w-auto">
+                <input
+                  type="text"
+                  placeholder="Search food item by name"
+                  className="p-2 border rounded-lg w-full md:w-64"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)} // Update the search term
+                />
+                <button
+                  onClick={() => setSearchTerm("")} // Clear the search term
+                  className="p-2 bg-gray-800 text-white rounded-lg w-full md:w-auto"
+                >
+                  Search
+                </button>
+              </div>
             </div>
           </div>
 
@@ -182,4 +207,3 @@ SamplePrevArrow.propTypes = {
   style: PropTypes.object,
   onClick: PropTypes.func,
 };
-
