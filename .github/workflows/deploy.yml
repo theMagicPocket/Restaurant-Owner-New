@@ -31,7 +31,7 @@ jobs:
       - name: Deploy to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          HOST: 3.109.201.207  # Replace with your EC2 instance's public IP
+          HOST: 13.127.174.18  # Replace with your EC2 instance's public IP
           USER: ubuntu  # Replace with the EC2 instance username if different
         run: |
           echo "$SSH_PRIVATE_KEY" > key.pem
