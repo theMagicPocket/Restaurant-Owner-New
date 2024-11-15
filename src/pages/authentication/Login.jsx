@@ -60,8 +60,8 @@ const Login = () => {
         dispatch(setRestaurantId(restaurant_id));
         dispatch(setIsverified(is_verified));
         console.log("vouchers check");
-        console.log(hotelData.data[0].vouchers)
-        dispatch(setVouchers(hotelData.data[0].vouchers))
+        console.log(hotelData.data[0].vouchers);
+        dispatch(setVouchers(hotelData.data[0].vouchers));
         navigate("/");
       } else if (hotelData && hotelData.length === 0) {
         const restaurant_id = "";
@@ -153,6 +153,7 @@ const Login = () => {
 
       {/* Form Section */}
       <div className="flex flex-col w-full h-full sm:w-1/2 justify-center items-center p-4 sm:p-8">
+        <div className="text-xl font-semibold mb-4">Food Hunt</div>
         <div className="text-xl font-semibold mb-4">Hello! Welcome</div>
 
         <form className="flex flex-col w-full max-w-sm" onSubmit={handleLogin}>
