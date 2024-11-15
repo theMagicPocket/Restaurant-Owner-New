@@ -153,7 +153,7 @@ const Login = () => {
 
       {/* Form Section */}
       <div className="flex flex-col w-full h-full sm:w-1/2 justify-center items-center p-4 sm:p-8">
-        <div className="text-xl font-semibold mb-4">Food Hunt</div>
+        <div className="text-2xl font-bold mb-4">Food Hunt</div>
         <div className="text-xl font-semibold mb-4">Hello! Welcome</div>
 
         <form className="flex flex-col w-full max-w-sm" onSubmit={handleLogin}>
